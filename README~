@@ -1,0 +1,5 @@
+This is an implementation of WebCL (i.e. OpenCL) for node.js.
+
+There is currently no standardized API for OpenCL in JavaScript.  This implementation
+is based on the proposed API found at www.khronos.org/webcl/ with minor changes.
+

@@ -1,0 +1,6 @@
+/**
+\mainpage
+
+CLWrapper provices a C++ API to OpenCL.
+
+*/
