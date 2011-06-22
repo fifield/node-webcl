@@ -92,8 +92,6 @@ Handle<Value> MemoryObject::getMemObjectInfo(const Arguments& args)
     default:
 	return ThrowException(Exception::Error(String::New("UNKNOWN param_name")));
     }
-
-    return ThrowException(Exception::Error(String::New("getMemObjectInfo unimplemented")));
 }
 
 /* static  */
