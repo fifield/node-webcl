@@ -2,6 +2,7 @@
 #include "programobject.h"
 #include "device.h"
 #include "kernelobject.h"
+#include "context.h"
 
 #include <iostream>
 
@@ -43,7 +44,52 @@ ProgramObject::~ProgramObject()
 Handle<Value> ProgramObject::getProgramInfo(const Arguments& args)
 {
     HandleScope scope;
-    return ThrowException(Exception::Error(String::New("getProgramInfo unimplemented")));
+    ProgramObject *prog = node::ObjectWrap::Unwrap<ProgramObject>(args.This());
+    cl_program_info param_name = args[1]->NumberValue();
+    size_t param_value_size_ret = 0;
+    char param_value[4096];
+
+    cl_int ret = ProgramWrapper::programInfoHelper(prog->getProgramWrapper(),
+						   param_name,
+						   sizeof(param_value),
+						   param_value,
+						   &param_value_size_ret);
+    if (ret != CL_SUCCESS) {
+	WEBCL_COND_RETURN_THROW(CL_INVALID_VALUE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_PROGRAM);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_RESOURCES);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_HOST_MEMORY);
+	return ThrowException(Exception::Error(String::New("UNKNOWN ERROR")));
+    }
+
+    switch (param_name) {
+    case CL_PROGRAM_REFERENCE_COUNT:
+    case CL_PROGRAM_NUM_DEVICES:
+	return scope.Close(Integer::NewFromUnsigned(*(cl_uint*)param_value));
+    case CL_PROGRAM_CONTEXT: {
+	cl_context ctx = *((cl_context*)param_value);
+	ContextWrapper *cw = new ContextWrapper(ctx);
+	return scope.Close(CLContext::New(cw)->handle_);
+    }
+    case CL_PROGRAM_DEVICES: {
+	size_t num_devices = param_value_size_ret / sizeof(cl_device_id);
+	Local<Array> deviceArray = Array::New(num_devices);
+	for (size_t i=0; i<num_devices; i++) {
+	    cl_device_id d = ((cl_device_id*)param_value)[i];
+	    DeviceWrapper *dw = new DeviceWrapper(d);
+	    deviceArray->Set(i, Device::New(dw)->handle_);
+	}
+	return scope.Close(deviceArray);
+    }
+    case CL_PROGRAM_SOURCE:
+	return scope.Close(String::New(param_value));
+    case CL_PROGRAM_BINARY_SIZES:
+	return ThrowException(Exception::Error(String::New("CL_PROGRAM_BINARY_SIZES unimplemented")));
+    case CL_PROGRAM_BINARIES:
+	return ThrowException(Exception::Error(String::New("CL_PROGRAM_BINARIES unimplemented")));
+    default:
+	return ThrowException(Exception::Error(String::New("UNKNOWN param_name")));
+    }
 }
 
 Handle<Value> ProgramObject::getProgramBuildInfo(const Arguments& args)
@@ -151,7 +197,26 @@ Handle<Value> ProgramObject::createKernel(const Arguments& args)
 Handle<Value> ProgramObject::createKernelsInProgram(const Arguments& args)
 {
     HandleScope scope;
-    return ThrowException(Exception::Error(String::New("createKernelsInProgram unimplemented")));
+    ProgramObject *prog = node::ObjectWrap::Unwrap<ProgramObject>(args.This());
+
+    std::vector<KernelWrapper*> kernels;
+    cl_int ret = prog->getProgramWrapper()->createKernelsInProgram(kernels);
+
+    if (ret != CL_SUCCESS) {
+	WEBCL_COND_RETURN_THROW(CL_INVALID_PROGRAM);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_PROGRAM_EXECUTABLE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_VALUE);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_RESOURCES);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_HOST_MEMORY);
+	return ThrowException(Exception::Error(String::New("UNKNOWN ERROR")));
+    }
+
+    Local<Array> kernelArray = Array::New(kernels.size());
+    for (int i=0; i<kernels.size(); i++) {
+	kernelArray->Set(i, KernelObject::New(kernels[i])->handle_);
+    }
+
+    return scope.Close(kernelArray);
 }
 
 /* static  */
