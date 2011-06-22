@@ -1,5 +1,6 @@
 
 #include "memoryobject.h"
+#include "node_buffer.h"
 
 #include <iostream>
 
@@ -35,6 +36,63 @@ MemoryObject::~MemoryObject()
 Handle<Value> MemoryObject::getMemObjectInfo(const Arguments& args)
 {
     HandleScope scope;
+
+    MemoryObject *mo = ObjectWrap::Unwrap<MemoryObject>(args.This());
+    Local<Value> v = args[0];
+    cl_mem_info param_name = v->NumberValue();
+    size_t param_value_size_ret = 0;
+    char param_value[1024];
+
+    cl_int ret = MemoryObjectWrapper::memoryObjectInfoHelper(mo->getMemoryObjectWrapper(),
+							     param_name,
+							     sizeof(param_value),
+							     param_value,
+							     &param_value_size_ret);
+
+    if (ret != CL_SUCCESS) {
+	WEBCL_COND_RETURN_THROW(CL_INVALID_VALUE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_MEM_OBJECT);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_RESOURCES);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_HOST_MEMORY);
+	return ThrowException(Exception::Error(String::New("UNKNOWN ERROR")));
+    }
+
+    switch (param_name) {
+    case CL_MEM_TYPE:
+    case CL_MEM_FLAGS:
+    case CL_MEM_REFERENCE_COUNT:
+    case CL_MEM_MAP_COUNT:
+	return scope.Close(Integer::NewFromUnsigned(*(cl_uint*)param_value));
+    case CL_MEM_SIZE:
+    case CL_MEM_OFFSET:
+	return scope.Close(Number::New(*(size_t*)param_value));
+    case CL_MEM_ASSOCIATED_MEMOBJECT: {
+	cl_mem mem = *((cl_mem*)param_value);
+	MemoryObjectWrapper *mw = new MemoryObjectWrapper(mem);
+	return scope.Close(MemoryObject::New(mw)->handle_);
+    }
+    case CL_MEM_HOST_PTR: {
+	char *ptr = *((char**)param_value);
+	param_name = CL_MEM_SIZE;
+	ret = MemoryObjectWrapper::memoryObjectInfoHelper(mo->getMemoryObjectWrapper(),
+							  param_name,
+							  sizeof(param_value),
+							  param_value,
+							  &param_value_size_ret);
+	if (ret != CL_SUCCESS) {
+	    WEBCL_COND_RETURN_THROW(CL_INVALID_VALUE);
+	    WEBCL_COND_RETURN_THROW(CL_INVALID_MEM_OBJECT);
+	    WEBCL_COND_RETURN_THROW(CL_OUT_OF_RESOURCES);
+	    WEBCL_COND_RETURN_THROW(CL_OUT_OF_HOST_MEMORY);
+	    return ThrowException(Exception::Error(String::New("UNKNOWN ERROR")));
+	}
+	size_t nbytes = *(size_t*)param_value;
+	return scope.Close(node::Buffer::New(ptr, nbytes)->handle_);
+    }
+    default:
+	return ThrowException(Exception::Error(String::New("UNKNOWN param_name")));
+    }
+
     return ThrowException(Exception::Error(String::New("getMemObjectInfo unimplemented")));
 }
 
@@ -42,7 +100,44 @@ Handle<Value> MemoryObject::getMemObjectInfo(const Arguments& args)
 Handle<Value> MemoryObject::getImageInfo(const Arguments& args)
 {
     HandleScope scope;
-    return ThrowException(Exception::Error(String::New("getImageInfo unimplemented")));
+    MemoryObject *mo = ObjectWrap::Unwrap<MemoryObject>(args.This());
+    Local<Value> v = args[0];
+    cl_mem_info param_name = v->NumberValue();
+    size_t param_value_size_ret = 0;
+    char param_value[1024];
+
+    cl_int ret = MemoryObjectWrapper::imageInfoHelper(mo->getMemoryObjectWrapper(),
+						      param_name,
+						      sizeof(param_value),
+						      param_value,
+						      &param_value_size_ret);
+    if (ret != CL_SUCCESS) {
+	WEBCL_COND_RETURN_THROW(CL_INVALID_VALUE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_MEM_OBJECT);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_RESOURCES);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_HOST_MEMORY);
+	return ThrowException(Exception::Error(String::New("UNKNOWN ERROR")));
+    }
+    
+    switch (param_name) {
+    case CL_IMAGE_ELEMENT_SIZE:
+    case CL_IMAGE_ROW_PITCH:
+    case CL_IMAGE_SLICE_PITCH:
+    case CL_IMAGE_WIDTH:
+    case CL_IMAGE_HEIGHT:
+    case CL_IMAGE_DEPTH:
+	return scope.Close(Number::New(*(size_t*)param_value));
+    case CL_IMAGE_FORMAT: {
+	cl_channel_order channel_order = *(cl_channel_order*)param_value;
+	cl_channel_type channel_type = *(cl_channel_type*)(param_value + sizeof(cl_channel_order));
+	Local<Object> obj = Object::New();
+	obj->Set(String::New("cl_channel_order"), Number::New(channel_order));
+	obj->Set(String::New("cl_channel_type"), Number::New(channel_type));
+	return scope.Close(obj);
+    }
+    default:
+	return ThrowException(Exception::Error(String::New("UNKNOWN param_name")));
+    }
 }
 
 /* static  */
