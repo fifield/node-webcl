@@ -400,6 +400,42 @@ cl_int CommandQueueWrapper::enqueueReadBuffer (MemoryObjectWrapper* aBuffer,
 }
 
 
+cl_int CommandQueueWrapper::enqueueCopyBuffer (MemoryObjectWrapper* aSrcBuffer,
+					       MemoryObjectWrapper* aDstBuffer,
+					       const size_t aSrcOffset,
+					       const size_t aDstOffset,
+					       const size_t aSize,
+					       std::vector<EventWrapper*> const& aWaitList,
+					       EventWrapper** aResultOut) {
+    D_METHOD_START;
+    cl_int err = CL_SUCCESS;
+    VALIDATE_ARG_POINTER (aSrcBuffer, &err, err);
+    VALIDATE_ARG_POINTER (aDstBuffer, &err, err);
+    VALIDATE_ARG_POINTER (aResultOut, &err, err);
+
+    cl_event* clEvWaitList = 0;
+    cl_uint clEvWaitListLen = 0;
+    if (!unwrapEventList (aWaitList, &clEvWaitList, &clEvWaitListLen))
+        return CL_INVALID_EVENT;  /* NOTE: synthetic error code! */
+
+    cl_event event;
+    err = clEnqueueCopyBuffer (mWrapped,
+                               aSrcBuffer->getWrapped (), aDstBuffer->getWrapped (),
+                               aSrcOffset, aDstOffset, aSize,
+                               clEvWaitListLen, clEvWaitList, &event);
+    if (clEvWaitList) free (clEvWaitList);
+
+    if (err != CL_SUCCESS) {
+        D_LOG (LOG_LEVEL_ERROR, "clEnqueueCopyBuffer failed. (error %d)", err);
+        return err;
+    }
+
+    *aResultOut = new(std::nothrow) EventWrapper (event);
+    if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
+    return err;
+}
+
+
 cl_int CommandQueueWrapper::enqueueWriteBufferRect (MemoryObjectWrapper* aBuffer,
                                                     cl_bool aBlockingWrite,
                                                     const size_t aBufferOrigin[3],
@@ -496,6 +532,57 @@ cl_int CommandQueueWrapper::enqueueReadBufferRect (MemoryObjectWrapper* aBuffer,
     (void)aBuffer; (void)aBlockingRead; (void)aBufferOrigin; (void)aHostOrigin;
     (void)aRegion; (void)aBufferRowPitch; (void)aBufferSlicePitch; (void)aHostRowPitch;
     (void)aHostSlicePitch; (void)aData; (void)aWaitList; (void)aResultOut;
+    D_LOG (LOG_LEVEL_ERROR, "CLWrapper support for OpenCL 1.1 API was not enabled at build time.");
+    return CL_INVALID_VALUE;
+#endif // CL_WRAPPER_CL_VERSION_SUPPORT >= 110
+}
+
+
+cl_int CommandQueueWrapper::enqueueCopyBufferRect (MemoryObjectWrapper* aSrcBuffer,
+						   MemoryObjectWrapper* aDstBuffer,
+                                                   const size_t aSrcOrigin[3],
+                                                   const size_t aDstOrigin[3],
+                                                   const size_t aRegion[3],
+                                                   size_t aSrcRowPitch,
+                                                   size_t aSrcSlicePitch,
+                                                   size_t aDstRowPitch,
+                                                   size_t aDstSlicePitch,
+                                                   std::vector<EventWrapper*> const& aWaitList,
+                                                   EventWrapper** aResultOut) {
+#if CL_WRAPPER_CL_VERSION_SUPPORT >= 110
+    D_METHOD_START;
+    cl_int err = CL_SUCCESS;
+    VALIDATE_ARG_POINTER (aSrcBuffer, &err, err);
+    VALIDATE_ARG_POINTER (aDstBuffer, &err, err);
+    VALIDATE_ARG_POINTER (aResultOut, &err, err);
+
+    cl_event* clEvWaitList = 0;
+    cl_uint clEvWaitListLen = 0;
+    if (!unwrapEventList (aWaitList, &clEvWaitList, &clEvWaitListLen))
+        return CL_INVALID_EVENT;  /* NOTE: synthetic error code! */
+
+    cl_event event;
+    err = clEnqueueCopyBufferRect (mWrapped,
+				   aSrcBuffer->getWrapped (),
+				   aDstBuffer->getWrapped (),
+                                   aSrcOrigin, aDstOrigin, aRegion,
+                                   aSrcRowPitch, aSrcSlicePitch,
+                                   aDstRowPitch, aDstSlicePitch,
+                                   clEvWaitListLen, clEvWaitList, &event);
+    if (clEvWaitList) free (clEvWaitList);
+
+    if (err != CL_SUCCESS) {
+        D_LOG (LOG_LEVEL_ERROR, "clEnqueueCopyBufferRect failed. (error %d)", err);
+        return err;
+    }
+
+    *aResultOut = new(std::nothrow) EventWrapper (event);
+    if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
+    return err;
+#else // CL_WRAPPER_CL_VERSION_SUPPORT >= 110
+    (void)aSrcBuffer; (void)aDstBuffer; (void)aSrcOrigin; (void)aDstOrigin; (void)aRegion;
+    (void)aSrcRowPitch; (void)aSrcSlicePitch;  (void)aDstRowPitch; (void)aDstSlicePitch; 
+    (void)aWaitList; (void)aResultOut;
     D_LOG (LOG_LEVEL_ERROR, "CLWrapper support for OpenCL 1.1 API was not enabled at build time.");
     return CL_INVALID_VALUE;
 #endif // CL_WRAPPER_CL_VERSION_SUPPORT >= 110

@@ -91,6 +91,14 @@ public:
                               std::vector<EventWrapper*> const& aWaitList,
                               EventWrapper** aResultOut);
 
+    cl_int enqueueCopyBuffer (MemoryObjectWrapper* aSrcBuffer,
+			      MemoryObjectWrapper* aDstBuffer,
+			      const size_t aSrcOffset,
+			      const size_t aDstOffset,
+			      const size_t aSize,
+			      std::vector<EventWrapper*> const& aWaitList,
+			      EventWrapper** aResultOut);
+
     // Note: OpenCL 1.1
     cl_int enqueueWriteBufferRect (MemoryObjectWrapper* aBuffer,
                                    cl_bool aBlockingWrite,
@@ -116,6 +124,19 @@ public:
                                   size_t aHostRowPitch,
                                   size_t aHostSlicePitch,
                                   void* aData,
+                                  std::vector<EventWrapper*> const& aWaitList,
+                                  EventWrapper** aResultOut);
+
+    // Note: OpenCL 1.1
+    cl_int enqueueCopyBufferRect (MemoryObjectWrapper* aSrcBuffer,
+				  MemoryObjectWrapper* aDstBuffer,
+				  const size_t aSrcOrigin[3],
+				  const size_t aDstOrigin[3],
+				  const size_t aRegion[3],
+				  size_t aSrcRowPitch,
+				  size_t aSrcSlicePitch,
+				  size_t aDstRowPitch,
+				  size_t aDstSlicePitch,
                                   std::vector<EventWrapper*> const& aWaitList,
                                   EventWrapper** aResultOut);
 
