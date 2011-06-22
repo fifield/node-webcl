@@ -63,10 +63,3 @@ for (var j=0; j<devices.length; j++) {
 //
 // 
 // 
-
-//var bufIn1 = cpu_ctx.createBuffer(cl.CL_MEM_READ_ONLY, 1024);
-//var bufIn2 = cpu_ctx.createBuffer(cl.CL_MEM_READ_ONLY, 1024);
-//var bufOut = cpu_ctx.createBuffer(cl.CL_MEM_READ_ONLY, 1024);
-
-//var e = cpu_ctx.createUserEvent();
-//e.hello();

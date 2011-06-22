@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 var WebCL = require('../lib/webcl');
-var Uint32Array = require('/home/jfifield/node-workspace/v8-typed-array/typed-array').Uint32Array;
+var Uint32Array = require('typed-array').Uint32Array;
 
 var alert = console.log;
 
