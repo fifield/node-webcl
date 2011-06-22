@@ -97,7 +97,7 @@ Handle<Value> ProgramObject::getProgramBuildInfo(const Arguments& args)
     HandleScope scope;
     ProgramObject *prog = node::ObjectWrap::Unwrap<ProgramObject>(args.This());
     Device *dev = ObjectWrap::Unwrap<Device>(args[0]->ToObject());
-    cl_device_info param_name = args[1]->NumberValue();
+    cl_program_info param_name = args[1]->NumberValue();
     size_t param_value_size_ret = 0;
     char param_value[4096];
     cl_int ret = ProgramWrapper::programBuildInfoHelper(prog->getProgramWrapper(),
