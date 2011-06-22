@@ -1,6 +1,7 @@
 
 #include "platform.h"
 #include "sampler.h"
+#include "context.h"
 
 #include <iostream>
 
@@ -44,18 +45,35 @@ Handle<Value> Sampler::getSamplerInfo(const Arguments& args)
     size_t param_value_size_ret = 0;
     char param_value[1024];
 
-    return ThrowException(Exception::Error(String::New("getSamplerInfo unimplemented")));
-    
     cl_int ret = SamplerWrapper::samplerInfoHelper(sampler->getSamplerWrapper(),
 						   param_name,
 						   sizeof(param_value),
 						   param_value,
 						   &param_value_size_ret);
     if (ret != CL_SUCCESS) {
+	WEBCL_COND_RETURN_THROW(CL_INVALID_VALUE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_SAMPLER);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_RESOURCES);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_HOST_MEMORY);
 	return ThrowException(Exception::Error(String::New("UNKNOWN ERROR")));
     }
 
     switch (param_name) {
+    case CL_SAMPLER_ADDRESSING_MODE:
+    case CL_SAMPLER_FILTER_MODE:
+    case CL_SAMPLER_REFERENCE_COUNT:
+	return scope.Close(Number::New(*(cl_uint*)param_value));
+    case CL_SAMPLER_CONTEXT:{
+	cl_context ctx = *((cl_context*)param_value);
+	ContextWrapper *cw = new ContextWrapper(ctx);
+	return scope.Close(CLContext::New(cw)->handle_);
+    }
+    case CL_SAMPLER_NORMALIZED_COORDS: {
+	cl_bool b = *((cl_bool*)param_value);
+	return scope.Close(Boolean::New(b ? true : false ));
+    }
+    default:
+	return ThrowException(Exception::Error(String::New("UNKNOWN param_name")));
     }
 
 }
