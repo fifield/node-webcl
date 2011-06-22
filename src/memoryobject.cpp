@@ -144,7 +144,34 @@ Handle<Value> MemoryObject::getImageInfo(const Arguments& args)
 Handle<Value> MemoryObject::getSubBuffer(const Arguments& args)
 {
     HandleScope scope;
-    return ThrowException(Exception::Error(String::New("getSubBuffer unimplemented")));
+    MemoryObject *mo = ObjectWrap::Unwrap<MemoryObject>(args.This());
+
+    cl_mem_flags flags = args[0]->NumberValue();
+
+    if (flags != CL_BUFFER_CREATE_TYPE_REGION)
+	return ThrowException(Exception::Error(String::New("CL_INVALID_VALUE")));
+
+    RegionWrapper region;
+    Local<Object> obj = args[1]->ToObject();
+    region.origin = obj->Get(String::New("origin"))->NumberValue();
+    region.size = obj->Get(String::New("size"))->NumberValue();
+
+    MemoryObjectWrapper *mw = 0;
+    cl_int ret = mo->getMemoryObjectWrapper()->createSubBuffer(flags,
+							       region,
+							       &mw);
+
+    if (ret != CL_SUCCESS) {
+	WEBCL_COND_RETURN_THROW(CL_INVALID_VALUE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_BUFFER_SIZE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_HOST_PTR);
+	WEBCL_COND_RETURN_THROW(CL_MEM_OBJECT_ALLOCATION_FAILURE);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_RESOURCES);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_HOST_MEMORY);
+	return ThrowException(Exception::Error(String::New("UNKNOWN ERROR")));
+    }
+
+    return scope.Close(MemoryObject::New(mw)->handle_);
 }
 
 /* static  */
