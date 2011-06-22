@@ -242,7 +242,7 @@ Handle<Value> CommandQueue::enqueueWriteBuffer(const Arguments& args)
     MemoryObject *mo = ObjectWrap::Unwrap<MemoryObject>(args[0]->ToObject());
     
     // TODO: arg checking
-    cl_bool blocking_write = args[1]->BooleanValue() ? CL_TRUE : CL_FALSE;;
+    cl_bool blocking_write = args[1]->BooleanValue() ? CL_TRUE : CL_FALSE;
     size_t offset = args[2]->Uint32Value();
     size_t cb = args[3]->Uint32Value();
     void *ptr = args[4]->ToObject()->GetIndexedPropertiesExternalArrayData();
@@ -930,7 +930,7 @@ Handle<Value> CommandQueue::enqueueMapBuffer(const Arguments& args)
 
     // TODO: arg checking
     MemoryObject *mo = ObjectWrap::Unwrap<MemoryObject>(args[0]->ToObject());
-    cl_bool blocking_map = args[1]->BooleanValue() ? CL_TRUE : CL_FALSE;;
+    cl_bool blocking_map = args[1]->BooleanValue() ? CL_TRUE : CL_FALSE;
     cl_map_flags map_flags = args[2]->Uint32Value();
     size_t offset = args[3]->NumberValue();
     size_t cb = args[4]->NumberValue();
@@ -965,7 +965,7 @@ Handle<Value> CommandQueue::enqueueMapImage(const Arguments& args)
 
     // TODO: arg checking
     MemoryObject *mo = ObjectWrap::Unwrap<MemoryObject>(args[0]->ToObject());
-    cl_bool blocking_map = args[1]->BooleanValue() ? CL_TRUE : CL_FALSE;;
+    cl_bool blocking_map = args[1]->BooleanValue() ? CL_TRUE : CL_FALSE;
     cl_map_flags map_flags = args[2]->Uint32Value();
 
     size_t origin[3];
