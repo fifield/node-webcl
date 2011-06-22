@@ -4,6 +4,7 @@
 #include "programobject.h"
 #include "memoryobject.h"
 #include "context.h"
+#include "device.h"
 #include "wrapper/include/clwrappertypes.h"
 
 #include <iostream>
@@ -85,7 +86,45 @@ Handle<Value> KernelObject::getKernelInfo(const Arguments& args)
 Handle<Value> KernelObject::getKernelWorkGroupInfo(const Arguments& args)
 {
     HandleScope scope;
-    return ThrowException(Exception::Error(String::New("getKernelInfo unimplemented")));
+    KernelObject *kernelObject = ObjectWrap::Unwrap<KernelObject>(args.This());
+    Device *device = ObjectWrap::Unwrap<Device>(args[0]->ToObject());
+    Local<Value> v = args[1];
+    cl_kernel_work_group_info param_name = v->NumberValue();
+    size_t param_value_size_ret = 0;
+    char param_value[1024];
+    cl_int ret = KernelWrapper::kernelWorkGroupInfoHelper(kernelObject->getKernelWrapper(),
+							  device->getDeviceWrapper(),
+							  param_name,
+							  sizeof(param_value),
+							  param_value,
+							  &param_value_size_ret);
+    if (ret != CL_SUCCESS) {
+	WEBCL_COND_RETURN_THROW(CL_INVALID_DEVICE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_VALUE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_KERNEL);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_RESOURCES);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_HOST_MEMORY);
+	return ThrowException(Exception::Error(String::New("UNKNOWN ERROR")));
+    }
+
+    switch (param_name) {
+    case CL_KERNEL_WORK_GROUP_SIZE:
+    case CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE:
+	return scope.Close(Number::New(*(size_t*)param_value));
+    case CL_KERNEL_LOCAL_MEM_SIZE:
+    case CL_KERNEL_PRIVATE_MEM_SIZE:
+	return scope.Close(Number::New(*(cl_ulong*)param_value));
+    case CL_KERNEL_COMPILE_WORK_GROUP_SIZE: {
+	Local<Array> sizeArray = Array::New(3);
+	for (size_t i=0; i<3; i++) {
+	    size_t s = ((size_t*)param_value)[i];
+	    sizeArray->Set(i, Number::New(s));
+	}
+	return scope.Close(sizeArray);
+    }
+    default:
+	return ThrowException(Exception::Error(String::New("UNKNOWN param_name")));
+    }
 }
 
 /* static */
