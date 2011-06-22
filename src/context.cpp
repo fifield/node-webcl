@@ -5,6 +5,7 @@
 #include "device.h"
 #include "commandqueue.h"
 #include "event.h"
+#include "sampler.h"
 
 #include <iostream>
 
@@ -168,28 +169,145 @@ Handle<Value> CLContext::createBuffer(const Arguments& args)
 Handle<Value> CLContext::createImage2D(const Arguments& args)
 {
     HandleScope scope;
-    return ThrowException(Exception::Error(String::New("createImage2D unimplemented")));
+    CLContext *context = node::ObjectWrap::Unwrap<CLContext>(args.This());
+    cl_mem_flags flags = args[0]->NumberValue();
+
+    ImageFormatWrapper image_format;
+    Local<Object> obj = args[1]->ToObject();
+    image_format.channelOrder = obj->Get(String::New("cl_channel_order"))->NumberValue();
+    image_format.channelDataType = obj->Get(String::New("cl_channel_type"))->NumberValue();
+
+    size_t image_width = args[2]->NumberValue();
+    size_t image_height = args[3]->NumberValue();
+    size_t image_row_pitch = args[4]->NumberValue();
+    
+    MemoryObjectWrapper *mw = 0;
+    cl_int ret = context->getContextWrapper()->createImage2D(flags,
+							     image_format,
+							     image_width,
+							     image_height,
+							     image_row_pitch,
+							     0, &mw);
+   if (ret != CL_SUCCESS) {
+       	WEBCL_COND_RETURN_THROW(CL_INVALID_CONTEXT);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_VALUE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_IMAGE_FORMAT_DESCRIPTOR);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_IMAGE_SIZE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_HOST_PTR);
+	WEBCL_COND_RETURN_THROW(CL_IMAGE_FORMAT_NOT_SUPPORTED);
+	WEBCL_COND_RETURN_THROW(CL_MEM_OBJECT_ALLOCATION_FAILURE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_OPERATION);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_RESOURCES);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_HOST_MEMORY);
+	return ThrowException(Exception::Error(String::New("UNKNOWN ERROR")));
+    }
+
+    return scope.Close(MemoryObject::New(mw)->handle_);
 }
 
 /* static */
 Handle<Value> CLContext::createImage3D(const Arguments& args)
 {
     HandleScope scope;
-    return ThrowException(Exception::Error(String::New("createImage3D unimplemented")));
+    CLContext *context = node::ObjectWrap::Unwrap<CLContext>(args.This());
+    cl_mem_flags flags = args[0]->NumberValue();
+
+    ImageFormatWrapper image_format;
+    Local<Object> obj = args[1]->ToObject();
+    image_format.channelOrder = obj->Get(String::New("cl_channel_order"))->NumberValue();
+    image_format.channelDataType = obj->Get(String::New("cl_channel_type"))->NumberValue();
+
+    size_t image_width = args[2]->NumberValue();
+    size_t image_height = args[3]->NumberValue();
+    size_t image_depth = args[4]->NumberValue();
+    size_t image_row_pitch = args[5]->NumberValue();
+    size_t image_slice_pitch = args[6]->NumberValue();
+    
+    MemoryObjectWrapper *mw = 0;
+    cl_int ret = context->getContextWrapper()->createImage3D(flags,
+							     image_format,
+							     image_width,
+							     image_height,
+							     image_depth,
+							     image_row_pitch,
+							     image_slice_pitch,
+							     0, &mw);
+   if (ret != CL_SUCCESS) {
+       	WEBCL_COND_RETURN_THROW(CL_INVALID_CONTEXT);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_VALUE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_IMAGE_FORMAT_DESCRIPTOR);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_IMAGE_SIZE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_HOST_PTR);
+	WEBCL_COND_RETURN_THROW(CL_IMAGE_FORMAT_NOT_SUPPORTED);
+	WEBCL_COND_RETURN_THROW(CL_MEM_OBJECT_ALLOCATION_FAILURE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_OPERATION);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_RESOURCES);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_HOST_MEMORY);
+	return ThrowException(Exception::Error(String::New("UNKNOWN ERROR")));
+    }
+
+    return scope.Close(MemoryObject::New(mw)->handle_);
 }
 
 /* static */
 Handle<Value> CLContext::createSampler(const Arguments& args)
 {
     HandleScope scope;
-    return ThrowException(Exception::Error(String::New("createSampler unimplemented")));
+    CLContext *context = node::ObjectWrap::Unwrap<CLContext>(args.This());
+    cl_bool norm_coords = args[0]->BooleanValue() ? CL_TRUE : CL_FALSE;
+    cl_addressing_mode addr_mode = args[1]->NumberValue();
+    cl_filter_mode filter_mode = args[2]->NumberValue();
+
+    SamplerWrapper *sw = 0;
+    cl_int ret = context->getContextWrapper()->createSampler(norm_coords,
+							     addr_mode,
+							     filter_mode,
+							     &sw);
+
+    if (ret != CL_SUCCESS) {
+       	WEBCL_COND_RETURN_THROW(CL_INVALID_CONTEXT);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_VALUE);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_OPERATION);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_RESOURCES);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_HOST_MEMORY);
+	return ThrowException(Exception::Error(String::New("UNKNOWN ERROR")));
+    }
+
+    return scope.Close(Sampler::New(sw)->handle_);
 }
 
 /* static */
 Handle<Value> CLContext::getSupportedImageFormats(const Arguments& args)
 {
     HandleScope scope;
-    return ThrowException(Exception::Error(String::New("getSupportedImageFormats unimplemented")));
+    CLContext *context = node::ObjectWrap::Unwrap<CLContext>(args.This());
+    cl_mem_flags flags = args[0]->NumberValue();
+    cl_mem_object_type image_type = args[1]->NumberValue();
+    std::vector<ImageFormatWrapper> image_formats;
+
+    cl_int ret = context->getContextWrapper()->getSupportedImageFormats(flags,
+									image_type,
+									image_formats);
+    
+    if (ret != CL_SUCCESS) {
+	WEBCL_COND_RETURN_THROW(CL_INVALID_CONTEXT);
+	WEBCL_COND_RETURN_THROW(CL_INVALID_VALUE);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_RESOURCES);
+	WEBCL_COND_RETURN_THROW(CL_OUT_OF_HOST_MEMORY);
+	return ThrowException(Exception::Error(String::New("UNKNOWN ERROR")));
+    }
+
+    Local<Array> imageFormats = Array::New();
+    for (int i=0; i<image_formats.size(); i++) {
+	Local<Object> format = Object::New();
+	format->Set(String::New("cl_channel_order"),
+		    Number::New(image_formats[i].channelOrder));
+	format->Set(String::New("cl_channel_type"),
+		    Number::New(image_formats[i].channelDataType));
+	imageFormats->Set(i, format);
+    }
+       
+    return scope.Close(imageFormats);
 }
 
 /* static */
