@@ -69,7 +69,7 @@ OPENCL_LDFLAGS += -l$(OPENCL_LIB)
 endif
 
 
-TARGET_PREFIX = /home/jfifield/node-workspace/node-webcl/build/
+TARGET_PREFIX = ../../../build/
 DEPS_PREFIX = .deps/
 BUILD_PREFIX = .build/
 SOURCES = clwrappercommon.cpp commandqueuewrapper.cpp contextwrapper.cpp \
