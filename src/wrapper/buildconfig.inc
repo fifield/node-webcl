@@ -54,7 +54,3 @@ CL_VERSION_SUPPORT ?= 110
 # Set the base library name of the OpenCL library used.
 # E.g. "libOpenCL.so" => "OpenCL"
 OPENCL_LIB = OpenCL
-
-export INCLUDES+=-I$(OPENCL_PATH)/include
-export LDFLAGS+=-L$(OPENCL_PATH)/lib/x86_64
-export CXXFLAGS+=-fPIC

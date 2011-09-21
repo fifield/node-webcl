@@ -8,10 +8,61 @@ VERSION = "0.0.1"
 
 def set_options(opt):
   opt.tool_options("compiler_cxx")
+  opt.add_option( '--opencl-lib'
+                  , action='store'
+                  , type='string'
+                  , default=False
+                  , help='Location of OpenCL library'
+                  )
+  opt.add_option( '--opencl-inc'
+                  , action='store'
+                  , type='string'
+                  , default=False
+                  , help='Location of OpenCL include files'
+                  )
 
 def configure(conf):
   conf.check_tool("compiler_cxx")
   conf.check_tool("node_addon")
+
+  o = Options.options
+  if o.opencl_lib:
+    conf.env['OPENCL_LIB_PATH'] = o.opencl_lib
+    conf.check(conf.env, lib='OpenCL', libpath=o.opencl_lib, uselib_store='OPENCL', mandatory=True)
+  else:
+    conf.check(conf.env, lib='OpenCL', uselib_store='OPENCL', mandatory=True)
+
+  if o.opencl_inc:
+    conf.env['OPENCL_INC_PATH'] = o.opencl_inc
+
+def wrapper_cmd(bld):
+  cmd = "make -C ../src/wrapper/src all"
+  return cmd
+
+def build_wrapper(bld):
+  wrapper = bld.new_task_gen(
+    name = 'wrapper',
+    source = bld.path.ant_glob('src/wrapper/src/*')+' '+bld.path.ant_glob('src/wrapper/include/*'),
+    before = "cxx",
+    rule = wrapper_cmd(bld)
+    )
+  wrapper.env.env = dict(environ)
+
+  if ('CXXFLAGS' not in wrapper.env.env): wrapper.env.env['CXXFLAGS'] = ""
+
+  if ('OPENCL_INC_PATH' in bld.env):
+    if ('INCLUDES' in wrapper.env.env):
+      wrapper.env.env['INCLUDES'] = wrapper.env.env["INCLUDES"] + " -I" + bld.env['OPENCL_INC_PATH']
+    else:
+      wrapper.env.env['INCLUDES'] = "-I" + bld.env['OPENCL_INC_PATH']
+
+  if ('OPENCL_LIB_PATH' in bld.env):
+    if ('LDFLAGS' in wrapper.env.env):
+      wrapper.env.env["LDFLAGS"] = wrapper.env.env["LDFLAGS"] + " -L" + bld.env['OPENCL_LIB_PATH']
+    else:
+      wrapper.env.env["LDFLAGS"] = "-L" + bld.env['OPENCL_LIB_PATH']
+
+  wrapper.env.env['CXXFLAGS'] = wrapper.env.env['CXXFLAGS'] + " -fPIC"
 
 def build(bld):
   obj = bld.new_task_gen("cxx", "shlib", "node_addon")
@@ -26,9 +77,13 @@ def build(bld):
   obj.source += "src/commandqueue.cpp "
   obj.source += "src/event.cpp "
   obj.source += "src/sampler.cpp "
-  obj.cxxflags = ["-O0", "-I"+environ['OPENCL_PATH']+"/include",
-                  "-D_FILE_OFFSET_BITS=64", "-D_LARGEFILE_SOURCE"]
-  obj.ldflags = ["-lclwrapper", "-L./"]
+
+  obj.lib = "clwrapper"
+  obj.libpath = "./"
+
+  if ('OPENCL_INC_PATH' in bld.env): obj.cxxflags = "-I" + bld.env['OPENCL_INC_PATH']
+
+  build_wrapper(bld)
 
 def shutdown():
   if Options.commands['clean']:
