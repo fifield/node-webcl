@@ -75,13 +75,14 @@ void CommandQueue::Init(Handle<Object> target)
     target->Set(String::NewSymbol("CommandQueue"), constructor_template->GetFunction());
 }
 
-CommandQueue::CommandQueue(Handle<Object> wrapper)
+CommandQueue::CommandQueue(Handle<Object> wrapper) : cw(0)
 {
     Wrap(wrapper);
 }
     
 CommandQueue::~CommandQueue()
 {
+    if (cw) cw->release();
 }
 
 /* static */

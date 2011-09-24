@@ -32,13 +32,14 @@ void KernelObject::Init(Handle<Object> target)
     target->Set(String::NewSymbol("KernelObject"), constructor_template->GetFunction());
 }
 
-KernelObject::KernelObject(Handle<Object> wrapper)
+KernelObject::KernelObject(Handle<Object> wrapper) : kw(0)
 {
     Wrap(wrapper);
 }
     
 KernelObject::~KernelObject()
 {
+    if (kw) kw->release();
 }
 
 /* static */

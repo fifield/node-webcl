@@ -27,13 +27,14 @@ void Platform::Init(Handle<Object> target)
     target->Set(String::NewSymbol("Platform"), constructor_template->GetFunction());
 }
 
-Platform::Platform(Handle<Object> wrapper)
+Platform::Platform(Handle<Object> wrapper) : pw(0)
 {
     Wrap(wrapper);
 }
     
 Platform::~Platform()
 {
+    if (pw) pw->release();
 }
 
 /* static */

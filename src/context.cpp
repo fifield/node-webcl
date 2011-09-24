@@ -40,13 +40,14 @@ void CLContext::Init(Handle<Object> target)
     target->Set(String::NewSymbol("Context"), constructor_template->GetFunction());
 }
 
-CLContext::CLContext(Handle<Object> wrapper)
+CLContext::CLContext(Handle<Object> wrapper) : cw(0)
 {
     Wrap(wrapper);
 }
     
 CLContext::~CLContext()
 {
+    if (cw) cw->release();
 }
 
 /* static */

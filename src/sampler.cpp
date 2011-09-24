@@ -26,13 +26,14 @@ void Sampler::Init(Handle<Object> target)
     target->Set(String::NewSymbol("Sampler"), constructor_template->GetFunction());
 }
 
-Sampler::Sampler(Handle<Object> wrapper)
+Sampler::Sampler(Handle<Object> wrapper) : sw(0)
 {
     Wrap(wrapper);
 }
     
 Sampler::~Sampler()
 {
+    if (sw) sw->release();
 }
 
 /* static */

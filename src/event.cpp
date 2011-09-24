@@ -28,13 +28,14 @@ void Event::Init(Handle<Object> target)
     target->Set(String::NewSymbol("Event"), constructor_template->GetFunction());
 }
 
-Event::Event(Handle<Object> wrapper)
+Event::Event(Handle<Object> wrapper) : ew(0)
 {
     Wrap(wrapper);
 }
     
 Event::~Event()
 {
+    if (ew) ew->release();
 }
 
 /* static  */
@@ -115,8 +116,6 @@ Handle<Value> Event::getEventProfilingInfo(const Arguments& args)
     default:
 	return ThrowException(Exception::Error(String::New("UNKNOWN param_name")));
     }
- 
-    return ThrowException(Exception::Error(String::New("getEventProfilingInfo unimplemented")));
 }
 
 /* static  */
@@ -156,9 +155,9 @@ Event *Event::New(EventWrapper* ew)
     Local<Value> arg = Integer::NewFromUnsigned(0);
     Local<Object> obj = constructor_template->GetFunction()->NewInstance(1, &arg);
 
-    Event *memobj = ObjectWrap::Unwrap<Event>(obj);
-    memobj->ew = ew;
+    Event *e = ObjectWrap::Unwrap<Event>(obj);
+    e->ew = ew;
 
-    return memobj;
+    return e;
 }
 

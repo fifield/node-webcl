@@ -25,13 +25,14 @@ void Device::Init(Handle<Object> target)
     target->Set(String::NewSymbol("Device"), constructor_template->GetFunction());
 }
 
-Device::Device(Handle<Object> wrapper)
+Device::Device(Handle<Object> wrapper) : dw(0)
 {
     Wrap(wrapper);
 }
     
 Device::~Device()
 {
+    if (dw) dw->release();
 }
 
 /* static */

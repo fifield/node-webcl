@@ -23,13 +23,14 @@ void MemoryObject::Init(Handle<Object> target)
     target->Set(String::NewSymbol("MemoryObject"), constructor_template->GetFunction());
 }
 
-MemoryObject::MemoryObject(Handle<Object> wrapper)
+MemoryObject::MemoryObject(Handle<Object> wrapper) : mw(0)
 {
     Wrap(wrapper);
 }
     
 MemoryObject::~MemoryObject()
 {
+    if (mw) mw->release();
 }
 
 /* static  */

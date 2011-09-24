@@ -32,13 +32,14 @@ void ProgramObject::Init(Handle<Object> target)
     target->Set(String::NewSymbol("ProgramObject"), constructor_template->GetFunction());
 }
 
-ProgramObject::ProgramObject(Handle<Object> wrapper)
+ProgramObject::ProgramObject(Handle<Object> wrapper) : pw(0)
 {
     Wrap(wrapper);
 }
     
 ProgramObject::~ProgramObject()
 {
+    if (pw) pw->release();
 }
 
 Handle<Value> ProgramObject::getProgramInfo(const Arguments& args)
