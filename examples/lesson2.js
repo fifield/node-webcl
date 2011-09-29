@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var WebCL = require('./lib/webcl');
+var WebCL = require('webcl');
 
 var alert = console.log;
 
@@ -12,7 +12,7 @@ function dumpCLData () {
     if (WebCL == undefined) {
       alert("Unfortunately your system does not support WebCL. " +
 	    "Make sure that you have the OpenCL extension installed.");
-      return false;
+      return;
     }
     
     // List of OpenCL information parameter names.

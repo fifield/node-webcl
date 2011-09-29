@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var WebCL = require('./lib/webcl');
+var WebCL = require('webcl');
 
 var alert = console.log;
 
@@ -10,7 +10,7 @@ function detectCL() {
   if (WebCL == undefined) {
       alert("Unfortunately your system does not support WebCL. " +
 	    "Make sure that you have the OpenCL extension installed.");
-    return false;
+    return;
   }
 
   // Get a list of available CL platforms, and another list of the

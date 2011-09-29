@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-var WebCL = require('../lib/webcl');
-var Uint32Array = require('typed-array').Uint32Array;
+var WebCL = require('webcl');
 
 var alert = console.log;
 
