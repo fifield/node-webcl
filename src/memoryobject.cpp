@@ -20,6 +20,10 @@ void MemoryObject::Init(Handle<Object> target)
     constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
     constructor_template->SetClassName(String::NewSymbol("WebCLMemoryObject"));
 
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getMemObjectInfo", getMemObjectInfo);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getImageInfo", getImageInfo);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "createSubBuffer", createSubBuffer);
+
     target->Set(String::NewSymbol("WebCLMemoryObject"), constructor_template->GetFunction());
 }
 
@@ -140,7 +144,7 @@ Handle<Value> MemoryObject::getImageInfo(const Arguments& args)
 }
 
 /* static  */
-Handle<Value> MemoryObject::getSubBuffer(const Arguments& args)
+Handle<Value> MemoryObject::createSubBuffer(const Arguments& args)
 {
     HandleScope scope;
     MemoryObject *mo = ObjectWrap::Unwrap<MemoryObject>(args.This());

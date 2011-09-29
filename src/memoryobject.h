@@ -19,7 +19,7 @@ public:
 
     static v8::Handle<v8::Value> getMemObjectInfo(const v8::Arguments& args);
     static v8::Handle<v8::Value> getImageInfo(const v8::Arguments& args);
-    static v8::Handle<v8::Value> getSubBuffer(const v8::Arguments& args);
+    static v8::Handle<v8::Value> createSubBuffer(const v8::Arguments& args);
 
     MemoryObjectWrapper *getMemoryObjectWrapper() { return mw; };
 
