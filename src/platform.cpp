@@ -19,12 +19,12 @@ void Platform::Init(Handle<Object> target)
     constructor_template = Persistent<FunctionTemplate>::New(t);
 
     constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor_template->SetClassName(String::NewSymbol("Platform"));
+    constructor_template->SetClassName(String::NewSymbol("WebCLPlatform"));
 
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "getPlatformInfo", getPlatformInfo);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "getDeviceIDs", getDeviceIDs);
 
-    target->Set(String::NewSymbol("Platform"), constructor_template->GetFunction());
+    target->Set(String::NewSymbol("WebCLPlatform"), constructor_template->GetFunction());
 }
 
 Platform::Platform(Handle<Object> wrapper) : pw(0)

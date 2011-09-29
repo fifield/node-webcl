@@ -23,7 +23,7 @@ void CLContext::Init(Handle<Object> target)
     constructor_template = Persistent<FunctionTemplate>::New(t);
 
     constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor_template->SetClassName(String::NewSymbol("Context"));
+    constructor_template->SetClassName(String::NewSymbol("WebCLContext"));
 
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "getContextInfo", getContextInfo);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, 
@@ -37,7 +37,7 @@ void CLContext::Init(Handle<Object> target)
     NODE_SET_PROTOTYPE_METHOD(constructor_template, 
 			      "getSupportedImageFormats", getSupportedImageFormats);
 
-    target->Set(String::NewSymbol("Context"), constructor_template->GetFunction());
+    target->Set(String::NewSymbol("WebCLContext"), constructor_template->GetFunction());
 }
 
 CLContext::CLContext(Handle<Object> wrapper) : cw(0)

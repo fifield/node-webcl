@@ -18,11 +18,11 @@ void Device::Init(Handle<Object> target)
     constructor_template = Persistent<FunctionTemplate>::New(t);
 
     constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor_template->SetClassName(String::NewSymbol("Device"));
+    constructor_template->SetClassName(String::NewSymbol("WebCLDevice"));
 
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "getDeviceInfo", getDeviceInfo);
 
-    target->Set(String::NewSymbol("Device"), constructor_template->GetFunction());
+    target->Set(String::NewSymbol("WebCLDevice"), constructor_template->GetFunction());
 }
 
 Device::Device(Handle<Object> wrapper) : dw(0)

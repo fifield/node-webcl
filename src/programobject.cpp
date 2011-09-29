@@ -20,7 +20,7 @@ void ProgramObject::Init(Handle<Object> target)
     constructor_template = Persistent<FunctionTemplate>::New(t);
 
     constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor_template->SetClassName(String::NewSymbol("ProgramObject"));
+    constructor_template->SetClassName(String::NewSymbol("WebCLProgram"));
 
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "getProgramInfo", getProgramInfo);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "getProgramBuildInfo", getProgramBuildInfo);
@@ -29,7 +29,7 @@ void ProgramObject::Init(Handle<Object> target)
     NODE_SET_PROTOTYPE_METHOD(constructor_template, 
 			      "createKernelsInProgram", createKernelsInProgram);
 
-    target->Set(String::NewSymbol("ProgramObject"), constructor_template->GetFunction());
+    target->Set(String::NewSymbol("WebCLProgram"), constructor_template->GetFunction());
 }
 
 ProgramObject::ProgramObject(Handle<Object> wrapper) : pw(0)

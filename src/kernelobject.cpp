@@ -23,13 +23,13 @@ void KernelObject::Init(Handle<Object> target)
     constructor_template = Persistent<FunctionTemplate>::New(t);
 
     constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor_template->SetClassName(String::NewSymbol("KernelObject"));
+    constructor_template->SetClassName(String::NewSymbol("WebCLKernel"));
 
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "getKernelInfo", getKernelInfo);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "getKernelWorkgroupInfo", getKernelInfo);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "setKernelArg", setKernelArg);
 
-    target->Set(String::NewSymbol("KernelObject"), constructor_template->GetFunction());
+    target->Set(String::NewSymbol("WebCLKernel"), constructor_template->GetFunction());
 }
 
 KernelObject::KernelObject(Handle<Object> wrapper) : kw(0)

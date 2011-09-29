@@ -18,9 +18,9 @@ void MemoryObject::Init(Handle<Object> target)
     constructor_template = Persistent<FunctionTemplate>::New(t);
 
     constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
-    constructor_template->SetClassName(String::NewSymbol("MemoryObject"));
+    constructor_template->SetClassName(String::NewSymbol("WebCLMemoryObject"));
 
-    target->Set(String::NewSymbol("MemoryObject"), constructor_template->GetFunction());
+    target->Set(String::NewSymbol("WebCLMemoryObject"), constructor_template->GetFunction());
 }
 
 MemoryObject::MemoryObject(Handle<Object> wrapper) : mw(0)
