@@ -1,0 +1,9 @@
+{
+  "name": "webcl",
+  "description": "OpenCL bindings for Node.js",
+  "version": "0.1.0",
+  "author": "Jeff Fifield <fifield@mtnhigh.net>",
+  "main": "webcl",
+  "repository": "git://github.com/fifield/node-webcl.git",
+  "engines": { "node": "> 0.5.7" }
+}

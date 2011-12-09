@@ -28,12 +28,20 @@ def configure(conf):
   o = Options.options
   if o.opencl_lib:
     conf.env['OPENCL_LIB_PATH'] = o.opencl_lib
-    conf.check(conf.env, lib='OpenCL', libpath=o.opencl_lib, uselib_store='OPENCL', mandatory=True)
+  elif 'OPENCL_LIB_PATH' in environ:
+    conf.env['OPENCL_LIB_PATH'] = environ['OPENCL_LIB_PATH']
   else:
-    conf.check(conf.env, lib='OpenCL', uselib_store='OPENCL', mandatory=True)
+    conf.env['OPENCL_LIB_PATH'] = '';
 
+  conf.check(conf.env, lib='OpenCL', libpath=conf.env['OPENCL_LIB_PATH'], 
+             uselib_store='OPENCL', mandatory=True)
+  
   if o.opencl_inc:
     conf.env['OPENCL_INC_PATH'] = o.opencl_inc
+  elif 'OPENCL_INC_PATH' in environ:
+    conf.env['OPENCL_INC_PATH'] = environ['OPENCL_INC_PATH']
+  else:
+    conf.env['OPENCL_INC_PATH'] = '';
 
 def wrapper_cmd(bld):
   cmd = "make -C ../src/wrapper/src all"
