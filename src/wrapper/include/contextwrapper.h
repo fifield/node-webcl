@@ -140,22 +140,22 @@ public:
 
     static cl_int createContext (cl_context_properties* aProperties,
                                  std::vector<DeviceWrapper*>& aDevices,
-                                 void (*aNotify) (const char *, const void *, size_t cb, void *),
+                                 void (CL_CALLBACK *aNotify) (const char *, const void *, size_t cb, void *),
                                  void* aNotifyUserData,
                                  ContextWrapper** aCtxOut);
     static cl_int createContext (std::vector<std::pair<cl_context_properties,cl_platform_id> >& aProperties,
                                  std::vector<DeviceWrapper*>& aDevices,
-                                 void (*aNotify) (const char *, const void *, size_t cb, void *),
+                                 void (CL_CALLBACK *aNotify) (const char *, const void *, size_t cb, void *),
                                  void* aNotifyUserData,
                                  ContextWrapper** aCtxOut);
     static cl_int createContextFromType (cl_context_properties* aProperties,
                                          cl_device_type aDeviceType,
-                                         void (*aNotify) (const char *, const void *, size_t cb, void *),
+                                         void (CL_CALLBACK *aNotify) (const char *, const void *, size_t cb, void *),
                                          void* aNotifyUserData,
                                          ContextWrapper** aCtxOut);
     static cl_int createContextFromType (std::vector<std::pair<cl_context_properties,cl_platform_id> >& aProperties,
                                          cl_device_type aDeviceType,
-                                         void (*aNotify) (const char *, const void *, size_t cb, void *),
+                                         void (CL_CALLBACK *aNotify) (const char *, const void *, size_t cb, void *),
                                          void* aNotifyUserData,
                                          ContextWrapper** aCtxOut);
     static cl_int waitForEvents (std::vector<EventWrapper const*> const& aEvents);

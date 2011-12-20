@@ -43,11 +43,12 @@ DeviceWrapper::DeviceWrapper (cl_device_id aHandle)
     : Wrapper (),
       mWrapped (aHandle)
 {
-
+    instanceRegistry.add (aHandle, this);
 }
 
 
 DeviceWrapper::~DeviceWrapper () {
+    instanceRegistry.remove (mWrapped);
 }
 
 

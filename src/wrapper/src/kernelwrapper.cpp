@@ -49,12 +49,12 @@ KernelWrapper::KernelWrapper (cl_kernel aHandle)
     : Wrapper (),
       mWrapped (aHandle)
 {
-
+    instanceRegistry.add (aHandle, this);
 }
 
 
 KernelWrapper::~KernelWrapper () {
-
+    instanceRegistry.remove (mWrapped);
 }
 
 

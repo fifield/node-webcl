@@ -42,12 +42,12 @@ EventWrapper::EventWrapper (cl_event aHandle)
     : Wrapper (),
       mWrapped (aHandle)
 {
-
+    instanceRegistry.add (aHandle, this);
 }
 
 
 EventWrapper::~EventWrapper () {
-
+    instanceRegistry.remove (mWrapped);
 }
 
 
@@ -68,7 +68,7 @@ cl_int EventWrapper::setUserEventStatus (cl_int aExecutionStatus) {
 
 
 cl_int EventWrapper::setEventCallback (cl_int aCommandExecCallbackType,
-                                       void (*aCallback)(cl_event, cl_int, void*),
+                                       void (CL_CALLBACK *aCallback)(cl_event, cl_int, void*),
                                        void* aUserData) {
 #if CL_WRAPPER_CL_VERSION_SUPPORT >= 110
     return clSetEventCallback (mWrapped, aCommandExecCallbackType,

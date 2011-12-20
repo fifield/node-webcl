@@ -40,28 +40,36 @@
 #include <vector>
 #include <string>
 
+#include <cstring> //memset
+
 using std::vector;
 using std::string;
 
 
 InstanceRegistry<cl_program, ProgramWrapper*> ProgramWrapper::instanceRegistry;
 
+
+cl_int ProgramWrapperInfoDetail::getProgramBinariesInfo (ProgramWrapper* aInstance, int aName, std::vector<std::string>& aValueOut, InfoFunc infoFunc) {
+    return aInstance->getProgramBinariesInfo (aName, aValueOut, infoFunc);
+}
+
+
 ProgramWrapper::ProgramWrapper (cl_program aHandle)
     : Wrapper (),
       mWrapped (aHandle)
 {
-
+    instanceRegistry.add (aHandle, this);
 }
 
 
 ProgramWrapper::~ProgramWrapper () {
-
+    instanceRegistry.remove (mWrapped);
 }
 
 
 cl_int ProgramWrapper::buildProgram (std::vector<DeviceWrapper*> const& aDevices,
                                      std::string aOptions,
-                                     void (*aNotify)(cl_program, void*),
+                                     void (CL_CALLBACK *aNotify)(cl_program, void*),
                                      void* aNotifyUserData) {
     D_METHOD_START;
 
@@ -98,7 +106,7 @@ cl_int ProgramWrapper::createKernel (std::string aKernelName, KernelWrapper** aR
         return err;
     }
 
-    *aResultOut = new(std::nothrow) KernelWrapper (kernel);
+    *aResultOut = KernelWrapper::getNewOrExisting (kernel);
     if (!aResultOut) return CL_OUT_OF_HOST_MEMORY;
 
     return err;
@@ -128,7 +136,7 @@ cl_int ProgramWrapper::createKernelsInProgram (std::vector<KernelWrapper*>& aRes
 
     aResultOut.clear ();
     for (cl_uint i = 0; i < num; ++i) {
-        KernelWrapper* wrapper = new(std::nothrow) KernelWrapper (buf[i]);
+        KernelWrapper* wrapper = KernelWrapper::getNewOrExisting (buf[i]);
         if (!wrapper) {
             D_LOG (LOG_LEVEL_ERROR, "Memory allocation failed.");
             free (buf);
@@ -144,6 +152,82 @@ cl_int ProgramWrapper::createKernelsInProgram (std::vector<KernelWrapper*>& aRes
         aResultOut.push_back (wrapper);
     }
     free (buf);
+
+    return err;
+}
+
+
+cl_int ProgramWrapper::getProgramBinariesInfo (int aName, std::vector<std::string>& aValueOut, InfoFunc infoFunc) const {
+    if (aName != CL_PROGRAM_BINARIES) {
+        D_LOG (LOG_LEVEL_ERROR, "Internal error! getProgramBinariesInfo only supports CL_PROGRAM_BINARIES!");
+        return CL_INVALID_VALUE;
+    }
+
+    char** buf = 0;
+    size_t sze = 0;
+    cl_int err = CL_SUCCESS;
+
+    std::vector<size_t> bufSizes;
+    err = Wrapper::getInfo (CL_PROGRAM_BINARY_SIZES, bufSizes, infoFunc);
+    if (CL_FAILED (err)) {
+        return err;
+    }
+
+    cl_uint numDevices = 0;
+    err = Wrapper::getInfo (CL_PROGRAM_NUM_DEVICES, numDevices, infoFunc);
+    if (CL_FAILED (err)) {
+        return err;
+    }
+
+    if (!infoFunc) {
+        D_LOG (LOG_LEVEL_ERROR, "Invalid infoFunc argument (null).");
+        return CL_INVALID_VALUE;
+    }
+
+    sze = numDevices * sizeof(char*);
+    buf = (char**)malloc (sze);
+    if (!buf) {
+        err = CL_OUT_OF_HOST_MEMORY;
+        goto done;
+    }
+    memset ((char*)buf, 0, sze);
+
+    for (size_t i = 0; i < numDevices; ++i) {
+        buf[i] = (char*)malloc (sizeof(char) * bufSizes[i]);
+        if (!buf[i]) {
+            err = CL_OUT_OF_HOST_MEMORY;
+            goto done;
+        }
+    }
+
+    err = infoFunc (this, aName, sze, (void*)buf, &sze);
+    if (err != CL_SUCCESS) {
+        D_LOG (LOG_LEVEL_ERROR, "getInfo for %d failed. (error %d)", aName, err);
+        goto done;
+    }
+    if (sze != numDevices * sizeof(char*)) {
+        D_LOG (LOG_LEVEL_ERROR, "Invalid size of binaries! %d, expected %d.", sze, numDevices * sizeof(char*));
+        err = CL_INVALID_VALUE;
+        goto done;
+    }
+
+    aValueOut.clear ();
+    aValueOut.reserve (numDevices);
+    for (size_t i = 0; i < numDevices; ++i) {
+        aValueOut.push_back (std::string (buf[i], bufSizes[i]));
+    }
+
+done:
+    if (err == CL_OUT_OF_HOST_MEMORY)
+        D_LOG (LOG_LEVEL_ERROR, "Memory allocation failed.");
+    if (buf) {
+        for (size_t i = 0; i < numDevices; ++i) {
+            if (buf[i]) {
+                free (buf[i]);
+            }
+        }
+        free (buf);
+    }
 
     return err;
 }

@@ -42,11 +42,12 @@ MemoryObjectWrapper::MemoryObjectWrapper (cl_mem aHandle)
     : Wrapper (),
       mWrapped (aHandle)
 {
+    instanceRegistry.add (aHandle, this);
 }
 
 
 MemoryObjectWrapper::~MemoryObjectWrapper () {
-
+    instanceRegistry.remove (mWrapped);
 }
 
 

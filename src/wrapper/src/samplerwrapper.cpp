@@ -42,12 +42,12 @@ SamplerWrapper::SamplerWrapper (cl_sampler aHandle)
     : Wrapper (),
       mWrapped (aHandle)
 {
-
+    instanceRegistry.add (aHandle, this);
 }
 
 
 SamplerWrapper::~SamplerWrapper () {
-
+    instanceRegistry.remove (mWrapped);
 }
 
 

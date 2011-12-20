@@ -57,7 +57,7 @@ public:
 
     // Note: OpenCL 1.1
     cl_int setEventCallback (cl_int aCommandExecCallbackType,
-                             void (*aCallback)(cl_event, cl_int, void*),
+                             void (CL_CALLBACK *aCallback)(cl_event, cl_int, void*),
                              void* aUserData);
 
 protected:

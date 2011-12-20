@@ -58,11 +58,12 @@ ContextWrapper::ContextWrapper (cl_context aHandle)
     : Wrapper (),
       mWrapped (aHandle)
 {
-
+    instanceRegistry.add (aHandle, this);
 }
 
 
 ContextWrapper::~ContextWrapper () {
+    instanceRegistry.remove (mWrapped);
 }
 
 
@@ -79,7 +80,7 @@ cl_int ContextWrapper::createProgramWithSource (std::string const& aSource,
     if (err != CL_SUCCESS || !program)
         D_LOG (LOG_LEVEL_ERROR, "clCreateProgramWithSource failed (error %d)", err);
 
-    *aProgramOut = new(std::nothrow) ProgramWrapper (program);
+    *aProgramOut = ProgramWrapper::getNewOrExisting (program);
     return err;
 }
 
@@ -166,7 +167,7 @@ cl_int ContextWrapper::createProgramWithBinary (std::vector<DeviceWrapper*> cons
         goto error;
     }
 
-    *aProgramOut = new(std::nothrow) ProgramWrapper (program);
+    *aProgramOut = ProgramWrapper::getNewOrExisting (program);
 
     aBinaryStatusOut.clear ();
     for (cl_uint i = 0; i < deviceListLen; ++i)
@@ -196,7 +197,7 @@ cl_int ContextWrapper::createCommandQueue (DeviceWrapper* aDevice,
     if (err != CL_SUCCESS || !cmdQ)
         D_LOG (LOG_LEVEL_ERROR, "clCreateCommandQueue failed. (error %d)", err);
 
-    *aCmdQueueOut = new(std::nothrow) CommandQueueWrapper (cmdQ);
+    *aCmdQueueOut = CommandQueueWrapper::getNewOrExisting (cmdQ);
     return err;
 }
 
@@ -212,7 +213,7 @@ cl_int ContextWrapper::createBuffer (cl_mem_flags aFlags, size_t aSize,
     if (err != CL_SUCCESS || !mem)
         D_LOG (LOG_LEVEL_ERROR, "clCreateBuffer failed. (error %d)", err);
 
-    *aResultOut = new(std::nothrow) MemoryObjectWrapper (mem);
+    *aResultOut = MemoryObjectWrapper::getNewOrExisting (mem);
     return err;
 }
 
@@ -238,7 +239,7 @@ cl_int ContextWrapper::createImage2D (cl_mem_flags aFlags,
     if (err != CL_SUCCESS || !mem)
         D_LOG (LOG_LEVEL_ERROR, "clCreateImage2D failed. (error %d)", err);
 
-    *aResultOut = new(std::nothrow) MemoryObjectWrapper (mem);
+    *aResultOut = MemoryObjectWrapper::getNewOrExisting (mem);
     return err;
 }
 
@@ -263,7 +264,7 @@ cl_int ContextWrapper::createImage3D (cl_mem_flags aFlags,
     if (err != CL_SUCCESS || !mem)
         D_LOG (LOG_LEVEL_ERROR, "clCreateImage3D failed. (error %d)", err);
 
-    *aResultOut = new(std::nothrow) MemoryObjectWrapper (mem);
+    *aResultOut = MemoryObjectWrapper::getNewOrExisting (mem);
     return err;
 }
 
@@ -281,7 +282,7 @@ cl_int ContextWrapper::createSampler (cl_bool aNormalizedCoords,
     if (err != CL_SUCCESS || !sampler)
         D_LOG (LOG_LEVEL_ERROR, "clCreateSampler failed. (error %d)", err);
 
-    *aResultOut = new(std::nothrow) SamplerWrapper (sampler);
+    *aResultOut = SamplerWrapper::getNewOrExisting (sampler);
     return err;
 }
 
@@ -332,7 +333,7 @@ cl_int ContextWrapper::createUserEvent (EventWrapper** aResultOut) {
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 #else // CL_WRAPPER_CL_VERSION_SUPPORT >= 110
@@ -355,7 +356,7 @@ cl_int ContextWrapper::createFromGLBuffer (cl_mem_flags aFlags,
     if (CL_FAILED (err) || !mem)
         D_LOG (LOG_LEVEL_ERROR, "clCreateFromGLBuffer failed. (error %d)", err);
 
-    *aResultOut = new(std::nothrow) MemoryObjectWrapper (mem);
+    *aResultOut = MemoryObjectWrapper::getNewOrExisting (mem);
     return err;
 #else //CL_WRAPPER_ENABLE_OPENGL_SUPPORT
     (void)aFlags; (void)aGLBufferObject; (void)aResultOut;
@@ -381,7 +382,7 @@ cl_int ContextWrapper::createFromGLTexture2D (cl_mem_flags aFlags,
     if (CL_FAILED (err) || !mem)
         D_LOG (LOG_LEVEL_ERROR, "clCreateFromGLTexture2D failed. (error %d)", err);
 
-    *aResultOut = new(std::nothrow) MemoryObjectWrapper (mem);
+    *aResultOut = MemoryObjectWrapper::getNewOrExisting (mem);
     return err;
 #else //CL_WRAPPER_ENABLE_OPENGL_SUPPORT
     (void)aFlags; (void)aGLTextureTarget; (void)aMipLevel; (void)aTexture; (void)aResultOut;
@@ -407,7 +408,7 @@ cl_int ContextWrapper::createFromGLTexture3D (cl_mem_flags aFlags,
     if (CL_FAILED (err) || !mem)
         D_LOG (LOG_LEVEL_ERROR, "clCreateFromGLTexture3D failed. (error %d)", err);
 
-    *aResultOut = new(std::nothrow) MemoryObjectWrapper (mem);
+    *aResultOut = MemoryObjectWrapper::getNewOrExisting (mem);
     return err;
 #else //CL_WRAPPER_ENABLE_OPENGL_SUPPORT
     (void)aFlags; (void)aGLTextureTarget; (void)aMipLevel; (void)aTexture; (void)aResultOut;
@@ -430,7 +431,7 @@ cl_int ContextWrapper::createFromGLRenderbuffer (cl_mem_flags aFlags,
     if (CL_FAILED (err) || !mem)
         D_LOG (LOG_LEVEL_ERROR, "clCreateFromGLRenderbuffer failed. (error %d)", err);
 
-    *aResultOut = new(std::nothrow) MemoryObjectWrapper (mem);
+    *aResultOut = MemoryObjectWrapper::getNewOrExisting (mem);
     return err;
 #else //CL_WRAPPER_ENABLE_OPENGL_SUPPORT
     (void)aFlags; (void)aRenderBuffer; (void)aResultOut;
@@ -467,7 +468,7 @@ cl_int ContextWrapper::contextInfoHelper (Wrapper const* aInstance, int aName,
 /* static */
 cl_int ContextWrapper::createContext (cl_context_properties* aProperties,
                                       std::vector<DeviceWrapper*>& aDevices,
-                                      void (*aNotify) (const char *, const void *, size_t cb, void *),
+                                      void (CL_CALLBACK *aNotify) (const char *, const void *, size_t cb, void *),
                                       void* aNotifyUserData,
                                       ContextWrapper** aCtxOut) {
     D_METHOD_START;
@@ -495,10 +496,10 @@ cl_int ContextWrapper::createContext (cl_context_properties* aProperties,
     delete[] devices;
 
     if (aCtxOut)
-        *aCtxOut = new(std::nothrow) ContextWrapper (ctx);
+        *aCtxOut = ContextWrapper::getNewOrExisting (ctx);
 
     if (err != CL_SUCCESS) {
-        D_LOG (LOG_LEVEL_ERROR, "clCreateContextFromType failed with error %d.", err);
+        D_LOG (LOG_LEVEL_ERROR, "clCreateContext failed with error %d.", err);
     }
 
     return err;
@@ -508,7 +509,7 @@ cl_int ContextWrapper::createContext (cl_context_properties* aProperties,
 /* static */
 cl_int ContextWrapper::createContext (std::vector<std::pair<cl_context_properties,cl_platform_id> >& aProperties,
                                       std::vector<DeviceWrapper*>& aDevices,
-                                      void (*aNotify) (const char *, const void *, size_t cb, void *),
+                                      void (CL_CALLBACK *aNotify) (const char *, const void *, size_t cb, void *),
                                       void* aNotifyUserData,
                                       ContextWrapper** aCtxOut) {
     D_METHOD_START;
@@ -536,7 +537,7 @@ cl_int ContextWrapper::createContext (std::vector<std::pair<cl_context_propertie
 /* static */
 cl_int ContextWrapper::createContextFromType (cl_context_properties* aProperties,
                                               cl_device_type aDeviceType,
-                                              void (*aNotify) (const char *, const void *, size_t cb, void *),
+                                              void (CL_CALLBACK *aNotify) (const char *, const void *, size_t cb, void *),
                                               void* aNotifyUserData,
                                               ContextWrapper** aCtxOut) {
     D_METHOD_START;
@@ -546,7 +547,7 @@ cl_int ContextWrapper::createContextFromType (cl_context_properties* aProperties
                                              aNotify, aNotifyUserData, &err);
 
     if (aCtxOut)
-        *aCtxOut = new(std::nothrow) ContextWrapper (ctx);
+        *aCtxOut = ContextWrapper::getNewOrExisting (ctx);
 
     if (err != CL_SUCCESS) {
         D_LOG (LOG_LEVEL_ERROR, "clCreateContextFromType failed. (error %d)", err);
@@ -559,7 +560,7 @@ cl_int ContextWrapper::createContextFromType (cl_context_properties* aProperties
 /* static */
 cl_int ContextWrapper::createContextFromType (std::vector<std::pair<cl_context_properties,cl_platform_id> >& aProperties,
                                               cl_device_type aDeviceType,
-                                              void (*aNotify) (const char *, const void *, size_t cb, void *),
+                                              void (CL_CALLBACK *aNotify) (const char *, const void *, size_t cb, void *),
                                               void* aNotifyUserData,
                                               ContextWrapper** aCtxOut) {
     D_METHOD_START;

@@ -35,7 +35,6 @@
 #define MEMORYOBJECTWRAPPER_H
 
 #include "clwrappercommon.h"
-#include "CL/cl_gl.h"
 
 class MemoryObjectWrapper : public Wrapper {
 public:

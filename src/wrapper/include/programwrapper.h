@@ -41,16 +41,60 @@
 #include <string>
 
 class KernelWrapper;
+class ProgramWrapper;
 
+/* Namespace ProgramWrapperInfoDetail contains templates to separate
+ * CL_PROGRAM_BINARIES info requests and to divert them to local getInfo
+ * implementation.
+ * ProgramWrapperInfoDetail::getProgramBinariesInfo forwards call to
+ * ProgramWrapper::getProgramBinariesInfo thus enabling calls to
+ * protected members in Wrapper. This is needed due to otherwise circular
+ * dependencies between ProgramWrapperInfoDetail and ProgramWrapper.
+ */
+namespace ProgramWrapperInfoDetail {
+    cl_int getProgramBinariesInfo (ProgramWrapper* aInstance, int aName, std::vector<std::string>& aValueOut, InfoFunc infoFunc);
+
+    template <typename T> inline cl_int getInfo (ProgramWrapper* aInstance, int aName, T& aValueOut, InfoFunc infoFunc) {
+        Wrapper* w = (Wrapper*)aInstance;
+        if (w) {
+            return CLWrapperDetail::getInfo (w, aName, aValueOut, infoFunc);
+        } else {
+            CL_W_LOGGER (CL_W_LOG_LEVEL_ERROR, "Internal error! Failed to cast instance to Wrapper!");
+            return CL_INVALID_VALUE;
+        }
+    }
+
+    // Specialization for string vectors, if aName is CL_PROGRAM_BINARIES a
+    // special version of getProgramInfo is called.
+    template <> inline cl_int getInfo<std::vector<std::string> > (ProgramWrapper* aInstance, int aName, std::vector<std::string>& aValueOut, InfoFunc infoFunc) {
+        Wrapper* w = (Wrapper*)aInstance;
+        if (w) {
+            if (aName == CL_PROGRAM_BINARIES) {
+                return getProgramBinariesInfo (aInstance, aName, aValueOut, infoFunc);
+            } else {
+                return CLWrapperDetail::getInfo (w, aName, aValueOut, infoFunc);
+            }
+        }else {
+            CL_W_LOGGER (CL_W_LOG_LEVEL_ERROR, "Internal error! Failed to cast instance to Wrapper!");
+            return CL_INVALID_VALUE;
+        }
+    }
+};
 
 class ProgramWrapper : public Wrapper {
 public:
+    friend cl_int ProgramWrapperInfoDetail::getProgramBinariesInfo (ProgramWrapper* aInstance, int aName, std::vector<std::string>& aValueOut, InfoFunc infoFunc);
+
     ProgramWrapper (cl_program aHandle);
     cl_program getWrapped () const { return mWrapped; }
 
     template <typename T>
     cl_int getInfo (int aName, T& aValueOut) {
-        return Wrapper::getInfo (aName, aValueOut, programInfoHelper);
+        /* Instead of calling the usual Wrapper::getInfo, ProgramWrapper has
+         * a local implementation as templates in ProgramWrapperInfoDetail.
+         * This is necessary to handle CL_PROGRAM_BINARIES.
+         */
+        return ProgramWrapperInfoDetail::getInfo (this, aName, aValueOut, programInfoHelper);
     }
 
     template <typename T>
@@ -60,7 +104,7 @@ public:
 
     cl_int buildProgram (std::vector<DeviceWrapper*> const& aDevices,
                          std::string aOptions,
-                         void (*aNotify)(cl_program, void*),
+                         void (CL_CALLBACK *aNotify)(cl_program, void*),
                          void* aNotifyUserData);
 
     cl_int createKernel (std::string aKernelName, KernelWrapper** aResultOut);
@@ -70,6 +114,16 @@ protected:
     virtual ~ProgramWrapper ();
     virtual inline cl_int retainWrapped () const { return clRetainProgram (mWrapped); }
     virtual inline cl_int releaseWrapped () const { return clReleaseProgram (mWrapped); }
+
+    /* This function retrieves and returns the value of CL_PROGRAM_BINARIES
+     * info parameter. A separate function is necessary since CL_PROGRAM_BINARIES
+     * returns an array of char pointers, sizes of which must be obtained
+     * with CL_PROGRAM_BINARY_SIZES.
+     *
+     * TODO: std::string is not an optimal choice for storing program binaries.
+     *       Maybe std::vector<uint8_t> ?
+     */
+    cl_int getProgramBinariesInfo (int aName, std::vector<std::string>& aValueOut, InfoFunc infoFunc) const;
 
 private:
     ProgramWrapper ();

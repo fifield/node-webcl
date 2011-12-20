@@ -49,6 +49,8 @@
 #include <vector>
 #include <string>
 
+#include <cstdint>
+
 
 /** CL_SUCCEEDED evaluates to true if the OpenCL error value \c err
  * indicates successfull operation.
@@ -86,9 +88,9 @@ typedef cl_int (*InfoFuncExtra)(Wrapper const* aInstance, Wrapper const* aExtra,
 // in the headers that benefit from logging. The CL_W_LOGGER macro defined
 // below is to be used in those cases.
 #ifdef WIN32
-#define CL_W_LOGGER(level,...) logger (__FILE__, __LINE__, __FUNCTION__, level, __VA_ARGS__);
+#define CL_W_LOGGER(level,...)  CLWrapperDetail::logger (__FILE__, __LINE__, __FUNCTION__, level, __VA_ARGS__);
 #else // WIN32
-#define CL_W_LOGGER(level,msg...) logger (__FILE__, __LINE__, __FUNCTION__, level, msg);
+#define CL_W_LOGGER(level,msg...)  CLWrapperDetail::logger (__FILE__, __LINE__, __FUNCTION__, level, msg);
 #endif // WIN32
 
 // Log levels are not available for externally used headers since
@@ -196,7 +198,7 @@ namespace CLWrapperDetail {
 
     // Vectors of basic types
     template<typename T>
-    cl_int getInfo (Wrapper const* aInstance, int aName, std::vector<T>& aValueOut, InfoFunc infoFunc) {
+    cl_int getInfo_basicV (Wrapper const* aInstance, int aName, std::vector<T>& aValueOut, InfoFunc infoFunc) {
         T* buf;
         size_t sze = 0;
         cl_int err = CL_SUCCESS;
@@ -228,6 +230,46 @@ namespace CLWrapperDetail {
             aValueOut.push_back (buf[i]);
         free (buf);
         return err;
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, int aName, std::vector<int8_t>& aValueOut, InfoFunc infoFunc) {
+        return getInfo_basicV (aInstance, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, int aName, std::vector<uint8_t>& aValueOut, InfoFunc infoFunc) {
+        return getInfo_basicV (aInstance, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, int aName, std::vector<int16_t>& aValueOut, InfoFunc infoFunc) {
+        return getInfo_basicV (aInstance, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, int aName, std::vector<uint16_t>& aValueOut, InfoFunc infoFunc) {
+        return getInfo_basicV (aInstance, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, int aName, std::vector<int32_t>& aValueOut, InfoFunc infoFunc) {
+        return getInfo_basicV (aInstance, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, int aName, std::vector<uint32_t>& aValueOut, InfoFunc infoFunc) {
+        return getInfo_basicV (aInstance, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, int aName, std::vector<int64_t>& aValueOut, InfoFunc infoFunc) {
+        return getInfo_basicV (aInstance, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, int aName, std::vector<uint64_t>& aValueOut, InfoFunc infoFunc) {
+        return getInfo_basicV (aInstance, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, int aName, std::vector<float>& aValueOut, InfoFunc infoFunc) {
+        return getInfo_basicV (aInstance, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, int aName, std::vector<double>& aValueOut, InfoFunc infoFunc) {
+        return getInfo_basicV (aInstance, aName, aValueOut, infoFunc);
     }
 
     // Explicit specializations for strings and string vectors
@@ -343,7 +385,7 @@ namespace CLWrapperDetail {
 
     // GetInfo with extra for vectors of basic types
     template<typename T>
-    cl_int getInfo (Wrapper const* aInstance, Wrapper const* aExtra, int aName, std::vector<T>& aValueOut, InfoFuncExtra infoFunc) {
+    cl_int getInfo_basicV (Wrapper const* aInstance, Wrapper const* aExtra, int aName, std::vector<T>& aValueOut, InfoFuncExtra infoFunc) {
         T* buf;
         size_t sze = 0;
         if (!infoFunc) {
@@ -374,6 +416,46 @@ namespace CLWrapperDetail {
             aValueOut.push_back (buf[i]);
         free (buf);
         return err;
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, Wrapper const* aExtra, int aName, std::vector<int8_t>& aValueOut, InfoFuncExtra infoFunc) {
+        return getInfo_basicV (aInstance, aExtra, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, Wrapper const* aExtra, int aName, std::vector<uint8_t>& aValueOut, InfoFuncExtra infoFunc) {
+        return getInfo_basicV (aInstance, aExtra, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, Wrapper const* aExtra, int aName, std::vector<int16_t>& aValueOut, InfoFuncExtra infoFunc) {
+        return getInfo_basicV (aInstance, aExtra, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, Wrapper const* aExtra, int aName, std::vector<uint16_t>& aValueOut, InfoFuncExtra infoFunc) {
+        return getInfo_basicV (aInstance, aExtra, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, Wrapper const* aExtra, int aName, std::vector<int32_t>& aValueOut, InfoFuncExtra infoFunc) {
+        return getInfo_basicV (aInstance, aExtra, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, Wrapper const* aExtra, int aName, std::vector<uint32_t>& aValueOut, InfoFuncExtra infoFunc) {
+        return getInfo_basicV (aInstance, aExtra, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, Wrapper const* aExtra, int aName, std::vector<int64_t>& aValueOut, InfoFuncExtra infoFunc) {
+        return getInfo_basicV (aInstance, aExtra, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, Wrapper const* aExtra, int aName, std::vector<uint64_t>& aValueOut, InfoFuncExtra infoFunc) {
+        return getInfo_basicV (aInstance, aExtra, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, Wrapper const* aExtra, int aName, std::vector<float>& aValueOut, InfoFuncExtra infoFunc) {
+        return getInfo_basicV (aInstance, aExtra, aName, aValueOut, infoFunc);
+    }
+    template<> inline
+    cl_int getInfo (Wrapper const* aInstance, Wrapper const* aExtra, int aName, std::vector<double>& aValueOut, InfoFuncExtra infoFunc) {
+        return getInfo_basicV (aInstance, aExtra, aName, aValueOut, infoFunc);
     }
 
     // GetInfo with extra for strings and string vectors

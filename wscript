@@ -70,6 +70,7 @@ def build_wrapper(bld):
     else:
       wrapper.env.env["LDFLAGS"] = "-L" + bld.env['OPENCL_LIB_PATH']
 
+  wrapper.env.env['CXXFLAGS'] = wrapper.env.env['CXXFLAGS'] + " -std=gnu++0x"
   wrapper.env.env['CXXFLAGS'] = wrapper.env.env['CXXFLAGS'] + " -fPIC"
 
 def build(bld):
@@ -90,6 +91,7 @@ def build(bld):
   obj.libpath = "./"
 
   if ('OPENCL_INC_PATH' in bld.env): obj.cxxflags = "-I" + bld.env['OPENCL_INC_PATH']
+  obj.cxxflags = [obj.cxxflags, '-std=gnu++0x']
 
   build_wrapper(bld)
 

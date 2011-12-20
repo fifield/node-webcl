@@ -48,11 +48,12 @@ PlatformWrapper::PlatformWrapper (cl_platform_id aHandle)
     : Wrapper (),
       mWrapped (aHandle)
 {
-
+    instanceRegistry.add (aHandle, this);
 }
 
 
 PlatformWrapper::~PlatformWrapper () {
+    instanceRegistry.remove (mWrapped);
 }
 
 

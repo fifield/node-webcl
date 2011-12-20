@@ -52,12 +52,12 @@ CommandQueueWrapper::CommandQueueWrapper (cl_command_queue aHandle)
     : Wrapper (),
       mWrapped (aHandle)
 {
-
+    instanceRegistry.add (aHandle, this);
 }
 
 
 CommandQueueWrapper::~CommandQueueWrapper () {
-
+    instanceRegistry.remove (mWrapped);
 }
 
 
@@ -170,7 +170,7 @@ cl_int CommandQueueWrapper::enqueueNDRangeKernel (KernelWrapper* aKernel,
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 }
@@ -200,7 +200,7 @@ cl_int CommandQueueWrapper::enqueueTask (KernelWrapper* aKernel,
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 }
@@ -311,7 +311,7 @@ cl_int CommandQueueWrapper::enqueueNativeKernel (void (*aUserFunc)(void *),
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 }
@@ -359,7 +359,7 @@ cl_int CommandQueueWrapper::enqueueWriteBuffer (MemoryObjectWrapper* aBuffer,
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 }
@@ -394,7 +394,7 @@ cl_int CommandQueueWrapper::enqueueReadBuffer (MemoryObjectWrapper* aBuffer,
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 }
@@ -430,7 +430,7 @@ cl_int CommandQueueWrapper::enqueueCopyBuffer (MemoryObjectWrapper* aSrcBuffer,
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 }
@@ -474,7 +474,7 @@ cl_int CommandQueueWrapper::enqueueWriteBufferRect (MemoryObjectWrapper* aBuffer
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 #else // CL_WRAPPER_CL_VERSION_SUPPORT >= 110
@@ -525,7 +525,7 @@ cl_int CommandQueueWrapper::enqueueReadBufferRect (MemoryObjectWrapper* aBuffer,
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 #else // CL_WRAPPER_CL_VERSION_SUPPORT >= 110
@@ -576,7 +576,7 @@ cl_int CommandQueueWrapper::enqueueCopyBufferRect (MemoryObjectWrapper* aSrcBuff
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 #else // CL_WRAPPER_CL_VERSION_SUPPORT >= 110
@@ -621,7 +621,7 @@ cl_int CommandQueueWrapper::enqueueWriteImage (MemoryObjectWrapper* aImage,
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 }
@@ -658,7 +658,7 @@ cl_int CommandQueueWrapper::enqueueReadImage (MemoryObjectWrapper* aImage,
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 }
@@ -694,7 +694,7 @@ cl_int CommandQueueWrapper::enqueueCopyImage (MemoryObjectWrapper* aSrcImage,
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 }
@@ -730,7 +730,7 @@ cl_int CommandQueueWrapper::enqueueCopyImageToBuffer (MemoryObjectWrapper* aSrcI
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 }
@@ -766,7 +766,7 @@ cl_int CommandQueueWrapper::enqueueCopyBufferToImage (MemoryObjectWrapper* aSrcB
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 }
@@ -803,7 +803,7 @@ cl_int CommandQueueWrapper::enqueueMapBuffer (MemoryObjectWrapper* aBuffer,
         return err;
     }
 
-    *aEventOut = new(std::nothrow) EventWrapper (event);
+    *aEventOut = EventWrapper::getNewOrExisting (event);
     if (!*aEventOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 }
@@ -845,7 +845,7 @@ cl_int CommandQueueWrapper::enqueueMapImage (MemoryObjectWrapper* aImage,
         return err;
     }
 
-    *aEventOut = new(std::nothrow) EventWrapper (event);
+    *aEventOut = EventWrapper::getNewOrExisting (event);
     if (!*aEventOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 }
@@ -875,7 +875,7 @@ cl_int CommandQueueWrapper::enqueueUnmapMemObject (MemoryObjectWrapper* aMemObj,
         return err;
     }
 
-    *aResultOut = new(std::nothrow) EventWrapper (event);
+    *aResultOut = EventWrapper::getNewOrExisting (event);
     if (!*aResultOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 }
@@ -893,7 +893,7 @@ cl_int CommandQueueWrapper::enqueueMarker (EventWrapper** aEventOut) {
         return err;
     }
 
-    *aEventOut = new(std::nothrow) EventWrapper (event);
+    *aEventOut = EventWrapper::getNewOrExisting (event);
     if (!*aEventOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 }
@@ -983,7 +983,7 @@ cl_int CommandQueueWrapper::enqueueAcquireGLObjects (std::vector<MemoryObjectWra
         return err;
     }
 
-    *aEventOut = new(std::nothrow) EventWrapper (event);
+    *aEventOut = EventWrapper::getNewOrExisting (event);
     if (!*aEventOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 #else //CL_WRAPPER_ENABLE_OPENGL_SUPPORT
@@ -1033,7 +1033,7 @@ cl_int CommandQueueWrapper::enqueueReleaseGLObjects (std::vector<MemoryObjectWra
         return err;
     }
 
-    *aEventOut = new(std::nothrow) EventWrapper (event);
+    *aEventOut = EventWrapper::getNewOrExisting (event);
     if (!*aEventOut) return CL_OUT_OF_HOST_MEMORY;
     return err;
 #else //CL_WRAPPER_ENABLE_OPENGL_SUPPORT
@@ -1054,7 +1054,7 @@ CommandQueueWrapper* CommandQueueWrapper::getNewOrExisting (cl_command_queue aHa
         res->retain ();
         return res;
     }
-    return new(std::nothrow) CommandQueueWrapper (aHandle);;
+    return new(std::nothrow) CommandQueueWrapper (aHandle);
 }
 
 
