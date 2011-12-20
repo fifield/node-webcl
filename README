@@ -1,12 +1,14 @@
 
 This is an implementation of WebCL (i.e. OpenCL) for node.js.
 
-There is currently no standardized API for OpenCL in JavaScript.  This implementation
-is based on the proposed API found at http://webcl.nokiaresearch.com/ with minor changes.
+There is currently no standardized API for OpenCL in JavaScript.  This 
+implementation is based on the proposed API found at 
+http://webcl.nokiaresearch.com/ with minor changes.
 
-WebCL for node is developed by Jeff Fifield.  The most current version can be found
-at https://github.com/fifield/node-webcl.
+WebCL for node is developed by Jeff Fifield.  The most current version can be 
+found at https://github.com/fifield/node-webcl.
 
 Documentation can be found at https://github.com/fifield/node-webcl/wiki/
 
-If this is useful to you, please consider contributing to development and testing!
+If this is useful to you, please consider contributing to development and 
+testing!
