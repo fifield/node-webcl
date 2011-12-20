@@ -1,5 +1,5 @@
 import Options
-from os import unlink, symlink, environ, chdir, mkdir
+from os import symlink, environ, chdir, mkdir, system
 from os.path import exists 
 
 srcdir = "."
@@ -96,10 +96,8 @@ def build(bld):
 
 def shutdown():
   if Options.commands['clean']:
-    try: unlink('node_modules/_webcl.node')
-    except: pass
-    try: unlink('node_modules/webcl.js')
-    except: pass
+    cmd = "make -C ./src/wrapper clean; rm -rf ./build; rm -rf node_modules"
+    system(cmd);
   else:
     if not exists('node_modules'): mkdir('node_modules')
     if exists('build/Release/_webcl.node') and not exists('node_modules/_webcl.node'):
