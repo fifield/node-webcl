@@ -1,0 +1,4 @@
+.git*
+test.js
+src/wrapper/src/.build
+src/wrapper/src/.deps
