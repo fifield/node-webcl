@@ -1,5 +1,5 @@
 import Options
-from os import unlink, symlink, popen, environ
+from os import unlink, symlink, environ, chdir, mkdir
 from os.path import exists 
 
 srcdir = "."
@@ -70,7 +70,6 @@ def build_wrapper(bld):
     else:
       wrapper.env.env["LDFLAGS"] = "-L" + bld.env['OPENCL_LIB_PATH']
 
-  wrapper.env.env['CXXFLAGS'] = wrapper.env.env['CXXFLAGS'] + " -std=gnu++0x"
   wrapper.env.env['CXXFLAGS'] = wrapper.env.env['CXXFLAGS'] + " -fPIC"
 
 def build(bld):
@@ -97,7 +96,17 @@ def build(bld):
 
 def shutdown():
   if Options.commands['clean']:
-    if exists('_webcl.node'): unlink('_webcl.node')
+    try: unlink('node_modules/_webcl.node')
+    except: pass
+    try: unlink('node_modules/webcl.js')
+    except: pass
   else:
-    if exists('build/default/_webcl.node') and not exists('_webcl.node'):
-      symlink('build/default/_webcl.node', '_webcl.node')
+    if not exists('node_modules'): mkdir('node_modules')
+    if exists('build/Release/_webcl.node') and not exists('node_modules/_webcl.node'):
+      chdir('node_modules')
+      symlink('../build/Release/_webcl.node', '_webcl.node')
+      chdir('..')
+    if exists('webcl.js') and not exists('node_modules/webcl.js'):
+      chdir('node_modules')
+      symlink('../webcl.js', 'webcl.js')
+      chdir('..')

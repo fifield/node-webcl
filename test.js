@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var cl = require('./lib/webcl');
+var cl = require('webcl');
 
 var platforms = cl.getPlatformIDs();
 for (var i=0; i<platforms.length; i++) {
