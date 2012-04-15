@@ -20,7 +20,9 @@ void Device::Init(Handle<Object> target)
     constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
     constructor_template->SetClassName(String::NewSymbol("WebCLDevice"));
 
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getDeviceInfo", getDeviceInfo);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getInfo", getDeviceInfo);
+    // TODO: getSupportedExtensions
+    // TODO: getExtension
 
     target->Set(String::NewSymbol("WebCLDevice"), constructor_template->GetFunction());
 }

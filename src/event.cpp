@@ -21,10 +21,12 @@ void Event::Init(Handle<Object> target)
     constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
     constructor_template->SetClassName(String::NewSymbol("WebCLEvent"));
 
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getEventInfo", getEventInfo);
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getEventProfilingInfo", getEventProfilingInfo);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getInfo", getEventInfo);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getProfilingInfo", getEventProfilingInfo);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "setUserEventStatus", setUserEventStatus);
- 
+
+    // TODO: setCallback
+
     target->Set(String::NewSymbol("WebCLEvent"), constructor_template->GetFunction());
 }
 

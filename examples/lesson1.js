@@ -19,11 +19,11 @@ function detectCL() {
   // that WebCL is not available.
 
   try {
-    var platforms = WebCL.getPlatformIDs();
+    var platforms = WebCL.getPlatforms();
     var devices = [];
     for (var i in platforms) {
       var plat = platforms[i];
-      devices[i] = plat.getDeviceIDs(WebCL.CL_DEVICE_TYPE_ALL);
+      devices[i] = plat.getDevices(WebCL.DEVICE_TYPE_ALL);
     }
     alert("Excellent! Your system does support WebCL.");
   } catch (e) {

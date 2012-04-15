@@ -40,41 +40,41 @@ function CL_vectorAdd () {
 	output += "\nVector length = " + vectorLength;
 
 	// Setup WebCL context using the default device of the first platform 
-	var platforms = WebCL.getPlatformIDs();
-	var ctx = WebCL.createContextFromType ([WebCL.CL_CONTEXT_PLATFORM, 
+	var platforms = WebCL.getPlatforms();
+	var ctx = WebCL.createContextFromType ([WebCL.CONTEXT_PLATFORM, 
 						platforms[0]],
-                                               WebCL.CL_DEVICE_TYPE_GPU);
+                                               WebCL.DEVICE_TYPE_GPU);
         
 	// Reserve buffers
 	var bufSize = vectorLength * 4; // size in bytes
 	output += "\nBuffer size: " + bufSize + " bytes";
-	var bufIn1 = ctx.createBuffer (WebCL.CL_MEM_READ_ONLY, bufSize);
-	var bufIn2 = ctx.createBuffer (WebCL.CL_MEM_READ_ONLY, bufSize);
-	var bufOut = ctx.createBuffer (WebCL.CL_MEM_WRITE_ONLY, bufSize);
+	var bufIn1 = ctx.createBuffer (WebCL.MEM_READ_ONLY, bufSize);
+	var bufIn2 = ctx.createBuffer (WebCL.MEM_READ_ONLY, bufSize);
+	var bufOut = ctx.createBuffer (WebCL.MEM_WRITE_ONLY, bufSize);
 	
 	// Create and build program for the first device
 	var kernelSrc = clProgramVectorAdd;
-	var program = ctx.createProgramWithSource(kernelSrc);
-	var devices = ctx.getContextInfo(WebCL.CL_CONTEXT_DEVICES);
+	var program = ctx.createProgram(kernelSrc);
+	var devices = ctx.getInfo(WebCL.CONTEXT_DEVICES);
 
 	try {
-	    program.buildProgram ([devices[0]], "");
+	    program.build ([devices[0]], "");
 	} catch(e) {
 	    alert ("Failed to build WebCL program. Error "
-		   + program.getProgramBuildInfo (devices[0], 
-						  WebCL.CL_PROGRAM_BUILD_STATUS)
+		   + program.getBuildInfo (devices[0], 
+					   WebCL.PROGRAM_BUILD_STATUS)
 		   + ":  " 
-		   + program.getProgramBuildInfo (devices[0], 
-						  WebCL.CL_PROGRAM_BUILD_LOG));
+		   + program.getBuildInfo (devices[0], 
+					   WebCL.PROGRAM_BUILD_LOG));
 	    throw e;
 	}
 
 	// Create kernel and set arguments
 	var kernel = program.createKernel ("ckVectorAdd");
-	kernel.setKernelArg (0, bufIn1, WebCL.types.MEM);
-	kernel.setKernelArg (1, bufIn2, WebCL.types.MEM);    
-	kernel.setKernelArg (2, bufOut, WebCL.types.MEM);
-	kernel.setKernelArg (3, vectorLength, WebCL.types.UINT);
+	kernel.setArg (0, bufIn1, WebCL.types.MEM);
+	kernel.setArg (1, bufIn2, WebCL.types.MEM);    
+	kernel.setArg (2, bufOut, WebCL.types.MEM);
+	kernel.setArg (3, vectorLength, WebCL.types.UINT);
 
 	// Create command queue using the first available device
 	var cmdQueue = ctx.createCommandQueue (devices[0], 0);

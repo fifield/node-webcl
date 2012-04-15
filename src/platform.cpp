@@ -21,8 +21,8 @@ void Platform::Init(Handle<Object> target)
     constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
     constructor_template->SetClassName(String::NewSymbol("WebCLPlatform"));
 
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getPlatformInfo", getPlatformInfo);
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getDeviceIDs", getDeviceIDs);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getInfo", getPlatformInfo);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getDevices", getDevices);
 
     target->Set(String::NewSymbol("WebCLPlatform"), constructor_template->GetFunction());
 }
@@ -38,7 +38,7 @@ Platform::~Platform()
 }
 
 /* static */
-Handle<Value> Platform::getDeviceIDs(const Arguments& args)
+Handle<Value> Platform::getDevices(const Arguments& args)
 {
     HandleScope scope;
     std::vector<DeviceWrapper*> devices;

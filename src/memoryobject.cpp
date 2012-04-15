@@ -20,8 +20,14 @@ void MemoryObject::Init(Handle<Object> target)
     constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
     constructor_template->SetClassName(String::NewSymbol("WebCLMemoryObject"));
 
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getMemObjectInfo", getMemObjectInfo);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getInfo", getMemObjectInfo);
+
+    // support getGLObjectInfo()?
+
+    // TODO: this goes in the WebCLImage interface
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "getImageInfo", getImageInfo);
+
+    // TODO: this goes in the WebCLBuffer interface
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "createSubBuffer", createSubBuffer);
 
     target->Set(String::NewSymbol("WebCLMemoryObject"), constructor_template->GetFunction());

@@ -25,17 +25,19 @@ void CLContext::Init(Handle<Object> target)
     constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
     constructor_template->SetClassName(String::NewSymbol("WebCLContext"));
 
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getContextInfo", getContextInfo);
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, 
-			      "createProgramWithSource", createProgramWithSource);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getInfo", getContextInfo);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "createProgram", createProgramWithSource);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "createCommandQueue", createCommandQueue);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "createBuffer", createBuffer);
+    // TODO: replace with single createImage
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "createImage2D", createImage2D);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "createImage3D", createImage3D);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "createSampler", createSampler);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "createUserEvent", createUserEvent);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, 
 			      "getSupportedImageFormats", getSupportedImageFormats);
+
+    // support for createFromGLBuffer, createFromGLRenderBuffer, createFromGLTexture2D?
 
     target->Set(String::NewSymbol("WebCLContext"), constructor_template->GetFunction());
 }

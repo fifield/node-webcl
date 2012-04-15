@@ -21,7 +21,7 @@ void Sampler::Init(Handle<Object> target)
     constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
     constructor_template->SetClassName(String::NewSymbol("WebCLSampler"));
 
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getSamplerInfo", getSamplerInfo);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getInfo", getSamplerInfo);
 
     target->Set(String::NewSymbol("WebCLSampler"), constructor_template->GetFunction());
 }

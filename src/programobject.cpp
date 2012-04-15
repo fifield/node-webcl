@@ -22,9 +22,9 @@ void ProgramObject::Init(Handle<Object> target)
     constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
     constructor_template->SetClassName(String::NewSymbol("WebCLProgram"));
 
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getProgramInfo", getProgramInfo);
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getProgramBuildInfo", getProgramBuildInfo);
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "buildProgram", buildProgram);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getInfo", getProgramInfo);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getBuildInfo", getProgramBuildInfo);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "build", buildProgram);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "createKernel", createKernel);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, 
 			      "createKernelsInProgram", createKernelsInProgram);

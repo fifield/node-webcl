@@ -31,8 +31,9 @@ public:
 	t->InstanceTemplate()->SetInternalFieldCount(1);
 	t->SetClassName(String::NewSymbol("WebCL"));
 
-	NODE_SET_PROTOTYPE_METHOD(t, "getPlatformIDs", getPlatformIDs);
+	NODE_SET_PROTOTYPE_METHOD(t, "getPlatforms", getPlatforms);
 	NODE_SET_PROTOTYPE_METHOD(t, "createContext", createContext);
+        // not in spec
 	NODE_SET_PROTOTYPE_METHOD(t, "createContextFromType", createContextFromType);
 	NODE_SET_PROTOTYPE_METHOD(t, "waitForEvents", waitForEvents);
 
@@ -51,7 +52,7 @@ public:
 	return args.This();
     }
     
-    static Handle<Value> getPlatformIDs(const Arguments& args)
+    static Handle<Value> getPlatforms(const Arguments& args)
     {
 	HandleScope scope;
 	std::vector<PlatformWrapper*> platforms;

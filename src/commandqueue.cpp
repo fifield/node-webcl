@@ -45,7 +45,7 @@ void CommandQueue::Init(Handle<Object> target)
     constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
     constructor_template->SetClassName(String::NewSymbol("WebCLCommandQueue"));
 
-    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getCommandQueueInfo", getCommandQueueInfo);
+    NODE_SET_PROTOTYPE_METHOD(constructor_template, "getInfo", getCommandQueueInfo);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "enqueueNDRangeKernel", enqueueNDRangeKernel);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "enqueueTask", enqueueTask);
     NODE_SET_PROTOTYPE_METHOD(constructor_template, "enqueueWriteBuffer", enqueueWriteBuffer);
